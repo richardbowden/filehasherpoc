@@ -61,13 +61,13 @@ int main(int argc, char const *argv[])
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
-    printf("hashing took %f seconds to execute \n", time_taken);
-
     size_t chunks = f->aligned_chunks;
     if (!f->aligned)
     {
         chunks++;
     }
+
+    printf("Hash Dump Start");
 
     for (size_t i = 0; i < chunks; i++)
     {
@@ -80,6 +80,11 @@ int main(int argc, char const *argv[])
                f->blocks[i].hash[0]);
     }
 
+    printf("Hash Dump Finish\n\n");
+    
+    char *si;
+    readable_fs(f->size, si);
+    printf("actual hashing of %s took %f seconds to hash %s \n", f->file, time_taken, si);
     fclose(fp);
     //should free f but who cares, the OS will do then when the process ends, no point wasting cpu cycles todo somthing the OS can do better
     return 0;

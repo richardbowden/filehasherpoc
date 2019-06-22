@@ -22,11 +22,11 @@ typedef struct file_s
     size_t last_chunk_offset;      //where the last chunk starts
     size_t last_chunk_offset_size; //the size size of the last chunk calculated from the offset
     bool aligned;                  //set if size is not divisable by block_size
-    block_t *blocks;             //the hashes of each block
+    block_t *blocks;               //the hashes of each block
 } file_t;
 
 file_t *new_file(char *file);
 file_t *populate_file_stats(char *file);
 void hash_file(file_t *file);
-
+void readable_fs(double size, char *buf);
 #endif

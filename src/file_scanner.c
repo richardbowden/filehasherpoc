@@ -4,11 +4,10 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-
 #define KILOBYTE 1024
-#define MEGABYTE (KILOBYTE*KILOBYTE)
-#define GIGABYTE (MEGABYTE*KILOBYTE)
-char     buffer[64*KILOBYTE];
+#define MEGABYTE (KILOBYTE * KILOBYTE)
+#define GIGABYTE (MEGABYTE * KILOBYTE)
+char buffer[64 * KILOBYTE];
 
 // Data to create dynamic block sizes depending on the size of the file
 //Block Sizes
@@ -23,7 +22,7 @@ char     buffer[64*KILOBYTE];
 // 8 GiB - 16 GiB	    8 MiB
 // 16 GiB - up	        16 MiB
 
-size_t BLOCK_SIZE = 64*KILOBYTE;
+size_t BLOCK_SIZE = 64 * KILOBYTE;
 
 file_t *new_file(char *file)
 {
@@ -79,4 +78,16 @@ file_t *populate_file_stats(char *file)
     block_t *b = malloc(num_of_blocks * sizeof(block_t));
     encapped_file->blocks = b;
     return encapped_file;
+}
+
+void readable_fs(double size /*in bytes*/, char *buf)
+{
+    int i = 0;
+    const char *units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+    while (size > 1024)
+    {
+        size /= 1024;
+        i++;
+    }
+    sprintf(buf, "%.*f %s", i, size, units[i]);
 }
