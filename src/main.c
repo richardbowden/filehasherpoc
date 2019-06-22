@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include "file_scanner.h"
-#include "meowhash.h"
+
 #include <time.h>
 #include <string.h>
 
@@ -30,33 +30,7 @@ int main(int argc, char const *argv[])
         exit(1);
     }
 
-    FILE *fp;
-    fp = fopen(f->file, "rb");
-
-    if (fp == NULL)
-    {
-        fprintf(stderr, "failed to open file: %s\n", file);
-        exit(EXIT_FAILURE);
-    }
-
-    size_t cur_bytes_read = 0;
-    size_t total_read = 0;
-    size_t block_counter = 0;
-    char buffer[BLOCK_SIZE]; //on the stack so its fast
-
-    while ((cur_bytes_read = fread(buffer, sizeof(char), BLOCK_SIZE, fp)) > 0)
-    {
-
-        meow_u128 Hash = MeowHash(MeowDefaultSeed, BLOCK_SIZE, buffer);
-        f->blocks[block_counter].offset = total_read;
-        f->blocks[block_counter].hash[3] = MeowU32From(Hash, 3);
-        f->blocks[block_counter].hash[2] = MeowU32From(Hash, 2);
-        f->blocks[block_counter].hash[1] = MeowU32From(Hash, 1);
-        f->blocks[block_counter].hash[0] = MeowU32From(Hash, 0);
-
-        total_read += cur_bytes_read;
-        block_counter += 1;
-    }
+    hash_file(f);
 
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
@@ -81,11 +55,11 @@ int main(int argc, char const *argv[])
     }
 
     printf("Hash Dump Finish\n\n");
-    
-    char *si;
+
+    char *si = NULL;
     readable_fs(f->size, si);
     printf("actual hashing of %s took %f seconds to hash %s \n", f->file, time_taken, si);
-    fclose(fp);
+
     //should free f but who cares, the OS will do then when the process ends, no point wasting cpu cycles todo somthing the OS can do better
     return 0;
 }
