@@ -21,8 +21,8 @@ message (STATUS "build type: " ${CMAKE_BUILD_TYPE})
 
 INCLUDE(CheckCCompilerFlag)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes -mavx2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes -mavx2")
 
 add_executable(filescanner src/main.c src/file_scanner.c)
 
