@@ -90,10 +90,10 @@ void readable_fs(double size /*in bytes*/, char **buf)
         size /= 1024;
         i++;
     }
-    
-    size_t s = sizeof(i)+sizeof(size)+sizeof(units[i])+1;
-    *buf = (char*)malloc(s);
-    sprintf(*buf, "%.*f %s", i, size, units[i]);
+
+    size_t s = sizeof(i) + sizeof(size) + sizeof(units[i]) + 1;
+    *buf = (char *)malloc(s);
+    sprintf(*buf, "%.02lf %s", size, units[i]);
 }
 
 void hash_file(file_t *f)

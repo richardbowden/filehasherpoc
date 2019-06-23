@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include "file_scanner.h"
-
+#include <stdlib.h>
 #include <time.h>
 #include <string.h>
 
@@ -56,9 +56,9 @@ int main(int argc, char const *argv[])
 
     printf("Hash Dump Finish\n\n");
 
-    char *si;
-    readable_fs(f->size, &si);
-    printf("actual hashing of %s took %f seconds to hash %s \n", f->file, time_taken, si);
+    // char *si;
+    // readable_fs(f->size, &si);
+    printf("actual hashing of %s took %f seconds to hash %zu bytes\n", f->file, time_taken, f->size);
 
     //should free f but who cares, the OS will do then when the process ends, no point wasting cpu cycles todo somthing the OS can do better
     return 0;
