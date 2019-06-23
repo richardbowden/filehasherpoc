@@ -28,5 +28,5 @@ typedef struct file_s
 file_t *new_file(char *file);
 file_t *populate_file_stats(char *file);
 void hash_file(file_t *file);
-void readable_fs(double size, char *buf);
+void readable_fs(double size, char **buf);
 #endif

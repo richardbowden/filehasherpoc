@@ -81,7 +81,7 @@ file_t *populate_file_stats(char *file)
     return encapped_file;
 }
 
-void readable_fs(double size /*in bytes*/, char *buf)
+void readable_fs(double size /*in bytes*/, char **buf)
 {
     int i = 0;
     const char *units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
@@ -92,8 +92,8 @@ void readable_fs(double size /*in bytes*/, char *buf)
     }
     
     size_t s = sizeof(i)+sizeof(size)+sizeof(units[i])+1;
-    buf = malloc(s);
-    sprintf(buf, "%.*f %s", i, size, units[i]);
+    *buf = (char*)malloc(s);
+    sprintf(*buf, "%.*f %s", i, size, units[i]);
 }
 
 void hash_file(file_t *f)
