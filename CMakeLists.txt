@@ -24,6 +24,6 @@ INCLUDE(CheckCCompilerFlag)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes -mavx2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes -mavx2")
 
-add_executable(filescanner src/main.c src/file_scanner.c)
+add_executable(filescanner src/main.c src/file_scanner.c src/file_scanner.h)
 
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
