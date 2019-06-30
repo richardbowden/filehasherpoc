@@ -8,7 +8,6 @@
 #define KILOBYTE 1024
 #define MEGABYTE (KILOBYTE * KILOBYTE)
 #define GIGABYTE (MEGABYTE * KILOBYTE)
-char buffer[64 * KILOBYTE];
 
 // Data to create dynamic block sizes depending on the size of the file
 //Block Sizes
@@ -23,7 +22,7 @@ char buffer[64 * KILOBYTE];
 // 8 GiB - 16 GiB	    8 MiB
 // 16 GiB - up	        16 MiB
 
-size_t BLOCK_SIZE = 64 * KILOBYTE;
+size_t BLOCK_SIZE = 256 * KILOBYTE;
 
 file_t *new_file(char *file)
 {
@@ -33,7 +32,7 @@ file_t *new_file(char *file)
     return f;
 }
 
-file_t *populate_file_stats(char *file)
+file_t *populate_file_stats(const char *file)
 {
     struct stat f_info;
 
@@ -58,8 +57,8 @@ file_t *populate_file_stats(char *file)
     file_t *encapped_file;
     size_t ss = sizeof(file_t) + sizeof(block_t);
     encapped_file = calloc(1, ss);
-
-    printf("size of encapped_file: %ld\n", sizeof(encapped_file));
+    encapped_file->f_info = f_info;
+    //    printf("size of encapped_file: %ld\n", sizeof(encapped_file));
 
     encapped_file->file = strdup(file);
     encapped_file->size = f_info.st_size;
@@ -67,6 +66,7 @@ file_t *populate_file_stats(char *file)
     encapped_file->aligned_chunks = aligned_chunks;
     encapped_file->aligned_size = aligned_chunks * BLOCK_SIZE;
     encapped_file->aligned = true;
+    encapped_file->block_size = BLOCK_SIZE;
 
     if (last_chunk_size != 0)
     {
@@ -127,4 +127,26 @@ void hash_file(file_t *f)
     }
 
     fclose(fp);
+}
+
+void push_file(file_node **head_ref, file_t *file)
+{
+    file_node *new_node = malloc(sizeof(file_node));
+
+    new_node->file = file;
+    new_node->next = (*head_ref);
+    new_node->prev = NULL;
+
+    if (*head_ref != NULL)
+    {
+        (*head_ref)->prev = new_node;
+    }
+    (*head_ref) = new_node;
+}
+
+file_list* new_file_list()
+{
+    file_list *f;
+    f = calloc(1, sizeof(f));
+    return f;
 }

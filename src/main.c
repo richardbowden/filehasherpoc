@@ -6,59 +6,73 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <ftw.h>
 
-int main(int argc, char const *argv[])
+#include <unistd.h>
+
+size_t file_counter = 0;
+size_t dir_counter = 0;
+
+file_node *files;
+int cc = 0;
+
+int file_handler(const char *f, const struct stat *f_stat, int i)
 {
-    char *file;
-    if (argc == 2)
+    switch (i)
     {
-        file = strdup(argv[1]);
+    case FTW_D:
+        dir_counter++;
+        break;
+    case FTW_F:
+        file_counter++;
+            cc++;
+        file_t *file;
+        file = populate_file_stats(f);
+        push_file(&files, file);
+            
+    default:
+        break;
     }
-    else
-    {
-        fprintf(stderr, "first arg must be a file to hash\n");
-        exit(1);
-    };
+
+    return 0;
+}
+
+int (*file_handle)(const char *f, const struct stat *f_stat, int i) = file_handler;
+
+int main(int argc, char *argv[])
+{
 
     clock_t t;
     t = clock();
+    files = calloc(1, sizeof(file_node));
 
-    file_t *f = populate_file_stats(file);
-    if (!f)
+    char *ff;
+    int opt;
+    while ((opt = getopt(argc, argv, "d:")) != -1)
     {
-        fprintf(stderr, "you did not enter a valid file and/or path: %s\n", file);
-        exit(1);
+        switch (opt)
+        {
+
+        case 'd':
+            printf("f:%s\n", optarg);
+            ff = strdup(optarg);
+            break;
+
+        default:
+            printf("invalid arg\n");
+            exit(EXIT_FAILURE);
+            break;
+        }
     }
 
-    hash_file(f);
+    ftw(ff, file_handle, 16);
+
 
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
-
-    size_t chunks = f->aligned_chunks;
-    if (!f->aligned)
-    {
-        chunks++;
-    }
-
-    printf("Hash Dump Start");
-
-    for (size_t i = 0; i < chunks; i++)
-    {
-        printf("block: %ld, offset: %ld, hash: %08X-%08X-%08X-%08X\n",
-               i,
-               f->blocks[i].offset,
-               f->blocks[i].hash[3],
-               f->blocks[i].hash[2],
-               f->blocks[i].hash[1],
-               f->blocks[i].hash[0]);
-    }
-
-    printf("Hash Dump Finish\n\n");
-
-    // char *si;
-    // readable_fs(f->size, &si);
-    printf("actual hashing of %s took %f seconds to hash %zu bytes\n", f->file, time_taken, f->size);
+    
+    
+    printf("actual hashing of %s took %f seconds to hash %d bytes\n", ff, time_taken, 0);
 
     //should free f but who cares, the OS will do then when the process ends, no point wasting cpu cycles todo somthing the OS can do better
     return 0;
