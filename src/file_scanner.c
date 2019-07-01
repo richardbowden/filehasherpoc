@@ -21,8 +21,28 @@
 // 4 GiB - 8 GiB	    4 MiB
 // 8 GiB - 16 GiB	    8 MiB
 // 16 GiB - up	        16 MiB
-
 size_t BLOCK_SIZE = 256 * KILOBYTE;
+
+void add_to_file_fifo(file_fifo_t *list, file_t *file)
+{
+
+    if (list->head == NULL)
+    {
+        list->head = file;
+        list->tail = file;
+        list->head->prev = NULL;
+        list->head->next = NULL;
+        list->tail->next = NULL;
+        list->tail->prev = NULL;
+    }
+    else
+    {
+        list->tail->next = file;
+        file->prev = list->tail;
+        list->tail = file;
+        list->tail->next = NULL;
+    }
+}
 
 file_t *new_file(char *file)
 {
@@ -129,24 +149,9 @@ void hash_file(file_t *f)
     fclose(fp);
 }
 
-void push_file(file_node **head_ref, file_t *file)
+file_fifo_t *new_file_fifo()
 {
-    file_node *new_node = malloc(sizeof(file_node));
-
-    new_node->file = file;
-    new_node->next = (*head_ref);
-    new_node->prev = NULL;
-
-    if (*head_ref != NULL)
-    {
-        (*head_ref)->prev = new_node;
-    }
-    (*head_ref) = new_node;
-}
-
-file_list* new_file_list()
-{
-    file_list *f;
+    file_fifo_t *f;
     f = calloc(1, sizeof(f));
     return f;
 }

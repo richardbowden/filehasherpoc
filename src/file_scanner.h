@@ -34,30 +34,33 @@ typedef struct file_s
     bool aligned;                  /**set if size is not divisable by block_size */
     block_t *blocks;               /**array of hashes of each block */
 
+    struct file_s *next;
+    struct file_s *prev;
 } file_t;
 
-/**file node for linked list */
-typedef struct file_node
+typedef struct file_fifo_s
 {
-    file_t *file;
-    struct file_node *next;
-    struct file_node *prev;
-} file_node;
+    struct file_s *head;
+    struct file_s *tail;
+} file_fifo_t;
 
-typedef struct file_list
-{
-    file_node *head;
-    file_node *tail;
-} file_list;
-
-/**new_file_list init's a new linked list */
-file_list *new_file_list(void);
-
+/** creates a file_t object with file which is a full path to a file*/
 file_t *new_file(char *file);
+
+/** takes a file_t, and calculates the file size and cchunking info */
 file_t *populate_file_stats(const char *file);
 
+/** hash_file takes a file_t and actually performs the hash calc */
 void hash_file(file_t *file);
-void push_file(file_node **head_ref, file_t *file);
 
-void push_file_to_list(file_list *list, file_t *file);
+/** linked list functions */
+
+/**new_file_fifo creates a new foe_lost */
+file_fifo_t *new_file_fifo(void);
+// void push_file(file_node **head_ref, file_t *file);
+
+// FIFO
+void add_to_file_fifo(file_fifo_t *list, file_t *file);
+file_t *pop_file_from_list(file_fifo_t *list);
+
 #endif
