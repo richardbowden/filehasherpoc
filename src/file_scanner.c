@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <ftw.h>
 #include "meowhash.h"
 
 #define KILOBYTE 1024
@@ -23,7 +24,9 @@
 // 16 GiB - up	        16 MiB
 size_t BLOCK_SIZE = 256 * KILOBYTE;
 
-void add_to_file_fifo(file_fifo_t *list, file_t *file)
+file_fifo_t *file_queue;
+
+void file_fifo_add(file_fifo_t *list, file_t *file)
 {
 
     if (list->head == NULL)
@@ -44,7 +47,7 @@ void add_to_file_fifo(file_fifo_t *list, file_t *file)
     }
 }
 
-file_t *new_file(char *file)
+file_t *new_file(const char *file)
 {
     file_t *f;
     f = calloc(1, sizeof(file_t));
@@ -52,20 +55,11 @@ file_t *new_file(char *file)
     return f;
 }
 
-file_t *populate_file_stats(const char *file)
+void populate_file_stats(file_t *file)
 {
-    struct stat f_info;
 
-    int err = stat(file, &f_info);
-
-    if (err != 0)
-    {
-        fprintf(stderr, "failed to stat file\n");
-        return NULL;
-    }
-
-    int aligned_chunks = f_info.st_size / BLOCK_SIZE;
-    int last_chunk_size = f_info.st_size % BLOCK_SIZE;
+    int aligned_chunks = file->f_info.st_size / BLOCK_SIZE;
+    int last_chunk_size = file->f_info.st_size % BLOCK_SIZE;
 
     size_t num_of_blocks = aligned_chunks;
 
@@ -74,33 +68,24 @@ file_t *populate_file_stats(const char *file)
         num_of_blocks += 1;
     }
 
-    file_t *encapped_file;
-    size_t ss = sizeof(file_t) + sizeof(block_t);
-    encapped_file = calloc(1, ss);
-    encapped_file->f_info = f_info;
-    //    printf("size of encapped_file: %ld\n", sizeof(encapped_file));
-
-    encapped_file->file = strdup(file);
-    encapped_file->size = f_info.st_size;
-
-    encapped_file->aligned_chunks = aligned_chunks;
-    encapped_file->aligned_size = aligned_chunks * BLOCK_SIZE;
-    encapped_file->aligned = true;
-    encapped_file->block_size = BLOCK_SIZE;
+    file->aligned_chunks = aligned_chunks;
+    file->aligned_size = aligned_chunks * BLOCK_SIZE;
+    file->aligned = true;
+    file->block_size = BLOCK_SIZE;
 
     if (last_chunk_size != 0)
     {
-        encapped_file->last_chunk_size = last_chunk_size;
-        encapped_file->last_chunk_offset = encapped_file->aligned_size + 1;
-        encapped_file->last_chunk_offset_size = last_chunk_size - 1;
-        encapped_file->aligned = false;
+        file->last_chunk_size = last_chunk_size;
+        file->last_chunk_offset = file->aligned_size;
+        file->last_chunk_offset_size = last_chunk_size;
+        file->aligned = false;
     }
-
+    file->block_count = num_of_blocks;
     block_t *b = malloc(num_of_blocks * sizeof(block_t));
-    encapped_file->blocks = b;
-    return encapped_file;
+    file->blocks = b;
 }
 
+#if false
 void readable_fs(double size /*in bytes*/, char **buf)
 {
     int i = 0;
@@ -115,6 +100,7 @@ void readable_fs(double size /*in bytes*/, char **buf)
     *buf = (char *)malloc(s);
     sprintf(*buf, "%.02lf %s", size, units[i]);
 }
+#endif
 
 void hash_file(file_t *f)
 {
@@ -152,6 +138,51 @@ void hash_file(file_t *f)
 file_fifo_t *new_file_fifo()
 {
     file_fifo_t *f;
-    f = calloc(1, sizeof(f));
+    f = calloc(1, sizeof(file_fifo_t));
     return f;
+}
+
+int file_handler(const char *cur_file, const struct stat *f_stat, int i)
+{
+    file_t *f;
+    switch (i)
+    {
+
+    case FTW_F:
+
+        f = new_file(cur_file);
+        f->f_info = *f_stat;
+        populate_file_stats(f);
+        hash_file(f);
+        file_fifo_add(file_queue, f);
+        break;
+    default:
+        break;
+    }
+
+    return 0;
+}
+
+int (*file_handle)(const char *f, const struct stat *f_stat, int i) = file_handler;
+
+// file_fifo_t *scan_files(char *root)
+// {
+//     file_fifo_t *queue
+// }
+
+int fs_get_files(char *root_dir, file_fifo_t *queue)
+{
+
+    //set the internal queue to the users queue
+    file_queue = queue;
+
+    int res = ftw(root_dir, file_handle, 32);
+
+    if (res)
+    {
+        printf("fucked");
+        exit(EXIT_FAILURE);
+    }
+    printf("test\n");
+    return 0;
 }

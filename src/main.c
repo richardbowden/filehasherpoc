@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <math.h>
-#include <sys/stat.h>
+
 #include <stdbool.h>
 #include "file_scanner.h"
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include <ftw.h>
 
 #include <unistd.h>
 
@@ -18,31 +17,6 @@ size_t dir_counter = 0;
 // file_nod *files;
 
 int cc = 0;
-
-int file_handler(const char *f, const struct stat *f_stat, int i)
-{
-    switch (i)
-    {
-    case FTW_D:
-        dir_counter++;
-        break;
-    case FTW_F:
-        file_counter++;
-        cc++;
-        file_t *file;
-        file = populate_file_stats(f);
-        // push_file(&files, file);
-
-        add_to_file_fifo(file_queue, file);
-
-    default:
-        break;
-    }
-
-    return 0;
-}
-
-int (*file_handle)(const char *f, const struct stat *f_stat, int i) = file_handler;
 
 int main(int argc, char *argv[])
 {
@@ -71,8 +45,19 @@ int main(int argc, char *argv[])
             break;
         }
     }
+    if (!ff){
+        fprintf(stderr, "root dir not set in -d option\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    file_fifo_t file_queue;
+    int res = fs_get_files(ff, &file_queue);
 
-    ftw(ff, file_handle, 16);
+    if (!res)
+    {
+        fprintf(stderr, "fs_get_files failed, jerk\n");
+        exit(EXIT_FAILURE);
+    }
 
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
@@ -80,5 +65,5 @@ int main(int argc, char *argv[])
     printf("actual hashing of %s took %f seconds to hash %d bytes\n", ff, time_taken, 0);
 
     //should free f but who cares, the OS will do then when the process ends, no point wasting cpu cycles todo somthing the OS can do better
-    return 0;
+    exit(EXIT_SUCCESS);
 }

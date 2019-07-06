@@ -1,5 +1,6 @@
 #ifndef FILE_SCANNER
 #define FILE_SCANNER
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/stat.h>
@@ -33,6 +34,7 @@ typedef struct file_s
     size_t last_chunk_offset_size; /**the size size of the last chunk calculated from the offset */
     bool aligned;                  /**set if size is not divisable by block_size */
     block_t *blocks;               /**array of hashes of each block */
+    size_t block_count;
 
     struct file_s *next;
     struct file_s *prev;
@@ -45,10 +47,10 @@ typedef struct file_fifo_s
 } file_fifo_t;
 
 /** creates a file_t object with file which is a full path to a file*/
-file_t *new_file(char *file);
+file_t *new_file(const char *file);
 
 /** takes a file_t, and calculates the file size and cchunking info */
-file_t *populate_file_stats(const char *file);
+void populate_file_stats(file_t *file);
 
 /** hash_file takes a file_t and actually performs the hash calc */
 void hash_file(file_t *file);
@@ -60,7 +62,14 @@ file_fifo_t *new_file_fifo(void);
 // void push_file(file_node **head_ref, file_t *file);
 
 // FIFO
-void add_to_file_fifo(file_fifo_t *list, file_t *file);
+void file_fifo_add(file_fifo_t *list, file_t *file);
 file_t *pop_file_from_list(file_fifo_t *list);
+
+int (*file_handle)(const char *f, const struct stat *f_stat, int i); // = file_handler;
+
+file_fifo_t *scan_files(char *root);
+
+//public interfaces
+int fs_get_files(char *root_dir, file_fifo_t *queue);
 
 #endif
