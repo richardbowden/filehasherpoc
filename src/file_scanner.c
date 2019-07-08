@@ -121,7 +121,7 @@ void hash_file(file_t *f)
     while ((cur_bytes_read = fread(buffer, sizeof(char), BLOCK_SIZE, fp)) > 0)
     {
 
-        meow_u128 Hash = MeowHash(MeowDefaultSeed, BLOCK_SIZE, buffer);
+        meow_u128 Hash = MeowHash(MeowDefaultSeed, cur_bytes_read, buffer);
         f->blocks[block_counter].offset = total_read;
         f->blocks[block_counter].hash[3] = MeowU32From(Hash, 3);
         f->blocks[block_counter].hash[2] = MeowU32From(Hash, 2);
