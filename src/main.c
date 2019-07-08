@@ -45,15 +45,16 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    if (!ff){
+    if (!ff)
+    {
         fprintf(stderr, "root dir not set in -d option\n");
         exit(EXIT_FAILURE);
     }
-    
+
     file_fifo_t file_queue;
     int res = fs_get_files(ff, &file_queue);
 
-    if (!res)
+    if (res != 0)
     {
         fprintf(stderr, "fs_get_files failed, jerk\n");
         exit(EXIT_FAILURE);
@@ -62,8 +63,41 @@ int main(int argc, char *argv[])
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
+    file_t *cur_file;
+    cur_file = file_queue.head;
+
+    char *h = (char *)malloc(sizeof(char) * 36 + 1);
+
+    while (cur_file != NULL)
+    {
+
+        for (int cc = 0; cc < cur_file->block_count; cc++)
+        {
+            //            char h[];
+            sprintf(h, "%08X-%08X-%08X-%08X",
+                    cur_file->blocks[cc].hash[3],
+                    cur_file->blocks[cc].hash[2],
+                    cur_file->blocks[cc].hash[1],
+                    cur_file->blocks[cc].hash[0]);
+
+            printf("%s, block: %d, hash: %s, size: %lld, block_size: %zu\n", cur_file->file, cc, h, cur_file->f_info.st_size, cur_file->block_size);
+        }
+
+        cur_file = cur_file->next;
+    }
+
     printf("actual hashing of %s took %f seconds to hash %d bytes\n", ff, time_taken, 0);
 
     //should free f but who cares, the OS will do then when the process ends, no point wasting cpu cycles todo somthing the OS can do better
     exit(EXIT_SUCCESS);
 }
+
+//char *get_hash(block_t *block)
+//{
+//
+//    printf("    %08X-%08X-%08X-%08X\n",
+//           MeowU32From(block, 3),
+//           MeowU32From(Hash, 2),
+//           MeowU32From(Hash, 1),
+//           MeowU32From(Hash, 0));
+//}

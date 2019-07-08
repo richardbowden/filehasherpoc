@@ -68,20 +68,21 @@ void populate_file_stats(file_t *file)
         num_of_blocks += 1;
     }
 
-    file->aligned_chunks = aligned_chunks;
-    file->aligned_size = aligned_chunks * BLOCK_SIZE;
-    file->aligned = true;
+    // file->aligned_chunks = aligned_chunks;
+    // file->aligned_size = aligned_chunks * BLOCK_SIZE;
+    // file->aligned = true;
     file->block_size = BLOCK_SIZE;
 
     if (last_chunk_size != 0)
     {
-        file->last_chunk_size = last_chunk_size;
-        file->last_chunk_offset = file->aligned_size;
-        file->last_chunk_offset_size = last_chunk_size;
-        file->aligned = false;
+        // file->last_chunk_size = last_chunk_size;
+        // file->last_chunk_offset = file->aligned_size;
+        // file->last_chunk_offset_size = last_chunk_size;
+        // file->aligned = false;
     }
     file->block_count = num_of_blocks;
-    block_t *b = malloc(num_of_blocks * sizeof(block_t));
+    block_t *b = (block_t *)malloc(num_of_blocks * sizeof(block_t));
+
     file->blocks = b;
 }
 
@@ -129,6 +130,7 @@ void hash_file(file_t *f)
         f->blocks[block_counter].hash[0] = MeowU32From(Hash, 0);
 
         total_read += cur_bytes_read;
+        printf("file: %s, block: %zu, total_bytes: %zu, current_bytes: %zu\n", f->file, block_counter, total_read, cur_bytes_read);
         block_counter += 1;
     }
 

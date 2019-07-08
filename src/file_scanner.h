@@ -23,17 +23,17 @@ typedef struct block_s
  */
 typedef struct file_s
 {
-    const char *file;              /**full paht to the file */
-    struct stat f_info;            /**file info */
-    size_t block_size;             /**the block_size selected for this file */
-    size_t size;                   /**total file size */
-    size_t aligned_size;           /**size that is divisiable by block_size */
-    size_t aligned_chunks;         /**number of chunks */
-    size_t last_chunk_size;        /**the remaining size if not aligned */
-    size_t last_chunk_offset;      /**where the last chunk starts */
-    size_t last_chunk_offset_size; /**the size size of the last chunk calculated from the offset */
-    bool aligned;                  /**set if size is not divisable by block_size */
-    block_t *blocks;               /**array of hashes of each block */
+    const char *file;   /**full paht to the file */
+    struct stat f_info; /**file info */
+    size_t block_size;  /**the block_size selected for this file */
+    size_t size;        /**total file size */
+    // size_t aligned_size;           /**size that is divisiable by block_size */
+    // size_t aligned_chunks;         /**number of chunks */
+    // size_t last_chunk_size;        /**the remaining size if not aligned */
+    // size_t last_chunk_offset;      /**where the last chunk starts */
+    // size_t last_chunk_offset_size; /**the size size of the last chunk calculated from the offset */
+    // bool aligned;                  /**set if size is not divisable by block_size */
+    block_t *blocks; /**array of hashes of each block */
     size_t block_count;
 
     struct file_s *next;
