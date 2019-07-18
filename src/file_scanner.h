@@ -29,14 +29,16 @@ typedef struct file_s
     size_t block_size;   /**the block_size selected for this file */
     size_t size;         /**total file size */
     size_t aligned_size; /**size that is divisiable by block_size */
-    // size_t aligned_chunks;         /**number of chunks */
+
     size_t last_block_size;   /**the remaining size if not aligned */
     size_t last_block_offset; /**where the last chunk starts */
-    // size_t last_chunk_offset_size; /**the size size of the last chunk calculated from the offset */
+
     bool aligned; /**set if size is not divisable by block_size */
     bool below_block;
     block_t *blocks; /**array of hashes of each block */
     size_t block_count;
+
+    double hash_scan_time; /**number of seconds it took to hash the file */
 
     struct file_s *next;
     struct file_s *prev;
@@ -46,6 +48,7 @@ typedef struct file_fifo_s
 {
     struct file_s *head;
     struct file_s *tail;
+    size_t count;
 } file_fifo_t;
 
 /** creates a file_t object with file which is a full path to a file*/
@@ -65,7 +68,7 @@ file_fifo_t *new_file_fifo(void);
 
 // FIFO
 void file_fifo_add(file_fifo_t *list, file_t *file);
-file_t *pop_file_from_list(file_fifo_t *list);
+file_t *fs_fifo_pop(file_fifo_t *list);
 
 int (*file_handle)(const char *f, const struct stat *f_stat, int i); // = file_handler;
 
