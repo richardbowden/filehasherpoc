@@ -18,14 +18,20 @@ typedef struct block_s
     int hash[4];   //the hash, its 128bit split in to 4, see https://github.com/cmuratori/meow_hash
 } block_t;
 
+
+int FileTypeFile;
+int FileTypeDir;
+
 /**
  * file_s holds data about file and its size and chunks
  */
 typedef struct file_s
 {
-    const char *file;   /**full paht to the file */
-    struct stat f_info; /**file info */
-
+    const char *file;   /** relative path to the file, minus base path */
+    const char *abs_path; //** absolute path to the file */
+    
+    struct stat f_info;     /**file info */
+    int type;               /** file or directory or maybe symlink */
     size_t block_size;   /**the block_size selected for this file */
     size_t size;         /**total file size */
     size_t aligned_size; /**size that is divisiable by block_size */

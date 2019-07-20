@@ -37,11 +37,11 @@ sync_directory *sync_dir_scan(char *root, int options)
 
     clock_t t, s;
     s = clock();
-    
+
     cur_file = fs_fifo_pop(&queue);
     while (cur_file != NULL)
     {
-//        DEBUG_PRINT("%s\n", cur_file->file);
+        //        DEBUG_PRINT("%s\n", cur_file->file);
 
         sd->files[counter] = cur_file;
         counter++;
@@ -50,9 +50,9 @@ sync_directory *sync_dir_scan(char *root, int options)
 
     t = clock() - s;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
-    
-    DEBUG_PRINT("time_taken: %f", time_taken);
-    
+
+    // DEBUG_PRINT("time_taken: %f", time_taken);
+
     return sd;
 }
 

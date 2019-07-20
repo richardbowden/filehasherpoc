@@ -26,10 +26,14 @@
 // 16 GiB - up	        16 MiB
 size_t BLOCK_SIZE = 256 * KILOBYTE;
 
-file_fifo_t *file_queue;
+int FileTypeFile = 0;
+int FileTypeDir = 1;
 
-size_t scanned_bytes;
-size_t scanned_files;
+// Globals local to this file @THREADS
+static file_fifo_t *file_queue;
+static size_t scanned_bytes;
+static size_t scanned_files;
+static int root_length = 0;
 
 void file_fifo_add(file_fifo_t *list, file_t *file)
 {
@@ -57,7 +61,19 @@ file_t *new_file(const char *file)
 {
     file_t *f;
     f = calloc(1, sizeof(file_t));
-    f->file = strdup(file);
+    f->abs_path = strdup(file);
+
+    int cur_file_len = strlen(file);
+    int rel_len = cur_file_len - root_length;
+
+    int rel_start = root_length + 1; //to skip the / on the start of the rel path
+    rel_len--;                       // as we do not include the / at the start of the rel path, we need to reduce the buffer by 1
+
+    char *rel = malloc(sizeof(char) * rel_len);
+    rel = strncpy(rel, file + rel_start, rel_len);
+
+    f->file = rel;
+
     return f;
 }
 
@@ -109,7 +125,7 @@ void readable_fs(double size /*in bytes*/, char **buf)
 void hash_file(file_t *f)
 {
     FILE *fp;
-    fp = fopen(f->file, "rb");
+    fp = fopen(f->abs_path, "rb");
 
     if (fp == NULL)
     {
@@ -184,12 +200,17 @@ int file_handler(const char *cur_file, const struct stat *f_stat, int i)
     file_t *f;
     switch (i)
     {
-            //        case FTW_d:
-//            break;
+        //                case FTW_d:
+        //            f = new_file(cur_file);
+        //                    break;
     case FTW_F:
 
         f = new_file(cur_file);
+
+        //        rel[rel_len] = '\0';
         f->f_info = *f_stat;
+        f->type = FileTypeFile;
+
         scanned_bytes += f_stat->st_size;
         scanned_files++;
         populate_file_stats(f);
@@ -206,10 +227,10 @@ int file_handler(const char *cur_file, const struct stat *f_stat, int i)
     default:
         break;
     }
-    
-//    DEBUG_PRINT("scanned files: %ld, scanned bytes: %ld\r", scanned_files, scanned_bytes);
-    
-    
+
+    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
+    //    DEBUG_PRINT("scanned files: %ld, scanned bytes: %ld\r", scanned_files, scanned_bytes);
+
     return 0;
 }
 
@@ -229,9 +250,13 @@ int fs_get_files(char *root_dir, file_fifo_t *queue)
     scanned_bytes = 0;
     scanned_files = 0;
 
+    root_length = strlen(root_dir);
+
     int res = ftw(root_dir, file_handle, 32);
-//    DEBUG_PRINT("\n");
-    
+
+    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
+    DEBUG_PRINT("\n");
+
     if (res)
     {
         printf("fucked");
