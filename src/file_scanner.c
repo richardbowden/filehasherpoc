@@ -64,16 +64,18 @@ file_t *new_file(const char *file)
     f->abs_path = strdup(file);
 
     int cur_file_len = strlen(file);
-    int rel_len = cur_file_len - root_length;
-
-    int rel_start = root_length + 1; //to skip the / on the start of the rel path
-    rel_len--;                       // as we do not include the / at the start of the rel path, we need to reduce the buffer by 1
-
-    char *rel = malloc(sizeof(char) * rel_len);
-    rel = strncpy(rel, file + rel_start, rel_len);
-
-    f->file = rel;
-
+    int rel_len = cur_file_len - root_length -1;
+    int rel_start = root_length+1;
+    
+    char *rel_path;
+    rel_path = malloc(rel_len * sizeof(char));
+    strncpy(rel_path, file+rel_start, rel_len);
+    rel_path[rel_len] = '\0'; // ensure null terminated string
+    
+    DEBUG_PRINT("rel_path: %s\n", rel_path);
+    
+    f->file = rel_path;
+  
     return f;
 }
 
@@ -228,7 +230,7 @@ int file_handler(const char *cur_file, const struct stat *f_stat, int i)
         break;
     }
 
-    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
+//    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
     //    DEBUG_PRINT("scanned files: %ld, scanned bytes: %ld\r", scanned_files, scanned_bytes);
 
     return 0;
@@ -254,8 +256,8 @@ int fs_get_files(char *root_dir, file_fifo_t *queue)
 
     int res = ftw(root_dir, file_handle, 32);
 
-    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
-    DEBUG_PRINT("\n");
+//    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
+//    DEBUG_PRINT("\n");
 
     if (res)
     {
