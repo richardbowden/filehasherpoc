@@ -18,7 +18,6 @@ typedef struct block_s
     int hash[4];   //the hash, its 128bit split in to 4, see https://github.com/cmuratori/meow_hash
 } block_t;
 
-
 int FileTypeFile;
 int FileTypeDir;
 
@@ -27,27 +26,22 @@ int FileTypeDir;
  */
 typedef struct file_s
 {
-    const char *file;   /** relative path to the file, minus base path */
-    const char *abs_path; //** absolute path to the file */
-    
-    struct stat f_info;     /**file info */
-    int type;               /** file or directory or maybe symlink */
-    size_t block_size;   /**the block_size selected for this file */
-    size_t size;         /**total file size */
-    size_t aligned_size; /**size that is divisiable by block_size */
+    const char *file_abs; //** absolute path to the file */
+    const char *file_rel; /** relative path to the file, minus base path */
 
-    size_t last_block_size;   /**the remaining size if not aligned */
-    size_t last_block_offset; /**where the last chunk starts */
-
-    bool aligned; /**set if size is not divisable by block_size */
-    bool below_block;
-    block_t *blocks; /**array of hashes of each block */
-    size_t block_count;
+    // struct stat f_info;  /**file info */
+    int type;          /** file or directory or maybe symlink */
+    size_t block_size; /**the block_size selected for this file */
+    size_t size;       /**total file size */
 
     double hash_scan_time; /**number of seconds it took to hash the file */
 
     struct file_s *next;
     struct file_s *prev;
+
+    size_t block_count;
+    block_t *blocks; /**array of hashes of each block */
+
 } file_t;
 
 typedef struct file_fifo_s
@@ -58,10 +52,10 @@ typedef struct file_fifo_s
 } file_fifo_t;
 
 /** creates a file_t object with file which is a full path to a file*/
-file_t *new_file(const char *file);
+file_t *new_file(const char *file, const struct stat *f_stat);
 
 /** takes a file_t, and calculates the file size and cchunking info */
-void populate_file_stats(file_t *file);
+// void populate_file_stats(file_t *file);
 
 /** hash_file takes a file_t and actually performs the hash calc */
 void hash_file(file_t *file);

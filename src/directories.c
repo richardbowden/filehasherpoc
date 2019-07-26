@@ -41,7 +41,7 @@ sync_directory *sync_dir_scan(char *root, int options)
     cur_file = fs_fifo_pop(&queue);
     while (cur_file != NULL)
     {
-        //        DEBUG_PRINT("%s\n", cur_file->file);
+        DEBUG_PRINT("%s\n", cur_file->file_abs);
 
         sd->files[counter] = cur_file;
         counter++;
