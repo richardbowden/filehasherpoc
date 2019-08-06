@@ -53,8 +53,8 @@ size_t sync_dir_write_file(char *file, sync_directory *sd)
         fwrite(&FILEHDRSignature, sizeof(FILEHDRSignature), 1, h);
 
         //abs_path
-        s = strlen(sd->files[i]->file_abs);
-        fwrite(sd->files[i]->file_abs, s + 1, 1, h);
+        s = strlen(sd->files[i]->file_abs)+1;
+        fwrite(sd->files[i]->file_abs, s, 1, h);
         //file
         s = strlen(sd->files[i]->file_rel);
         fwrite(sd->files[i]->file_rel, s + 1, 1, h);

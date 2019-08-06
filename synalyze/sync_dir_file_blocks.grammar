@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ufwb version="1.17">
+    <grammar name="sync_dir_file_blocks" start="id:2" author="Richard Bowden">
+        <description>Grammar for my file format</description>
+        <structure name="hash_block_store" id="2" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <binary name="signature" mustmatch="yes" id="3" length="8">
+                <fixedvalues>
+                    <fixedvalue name="sig" value="894853594E438986"/>
+                </fixedvalues>
+            </binary>
+            <number name="version_major" id="4" type="integer" length="4"/>
+            <number name="version_minor" id="5" type="integer" length="4"/>
+            <string name="base_path" id="6" type="zero-terminated"/>
+            <number name="file_count" id="7" type="integer" length="8"/>
+            <structref name="file_blk" id="9" repeatmax="file_count" structure="id:8"/>
+        </structure>
+        <structure name="file_blk" id="8" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <binary name="File Header" mustmatch="yes" id="11" length="4">
+                <fixedvalues>
+                    <fixedvalue name="sss" value="46484452"/>
+                </fixedvalues>
+            </binary>
+            <string name="file_abs" id="12" type="zero-terminated"/>
+            <string name="file_rel" id="13" type="zero-terminated"/>
+            <number name="type" id="14" type="integer" length="32" lengthunit="bit"/>
+            <number name="block_size" id="15" type="integer" length="32" lengthunit="bit"/>
+            <number name="size" id="16" type="integer" length="64" lengthunit="bit"/>
+            <number name="uid" id="17" type="integer" length="32" lengthunit="bit"/>
+            <number name="gid" id="18" type="integer" length="32" lengthunit="bit"/>
+        </structure>
+        <structure name="timespec" id="20" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <number name="tv_sec" id="21" type="integer" length="8"/>
+            <number name="tv_nsec" id="22" type="integer" length="8"/>
+        </structure>
+    </grammar>
+</ufwb>
