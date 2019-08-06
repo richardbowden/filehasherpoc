@@ -7,14 +7,15 @@
 int SyncDirMask_None = 1 << 0;
 int SyncDirMask_Recursive = 1 << 1;
 
+
 sync_directory *sync_dir_new(char *root, size_t file_count, int options)
 {
-    sync_directory *sd = malloc(sizeof(*sd) + (file_count * sizeof(file_t)));
-    // sync_directory *sd = (sync_directory *)malloc(sizeof(sync_directory));
-    // sd->files = (file_t *)malloc(sizeof(file_t) * file_count);
-    // sd->files = calloc(file_count, sizeof(file_t));
+    size_t s = sizeof(sync_directory) + (file_count + sizeof(file_t));
+
+    sync_directory *sd = calloc(1, s);
     sd->files_count = file_count;
-    sd->options = options;
+    sd->option_flags = options;
+    sd->root = strdup(root);
     return sd;
 }
 
@@ -22,7 +23,6 @@ sync_directory *sync_dir_scan(char *root, int options)
 {
     //start the directory scan
     file_fifo_t queue = {};
-
     fs_get_files(root, &queue);
 
     if (queue.count == 0)

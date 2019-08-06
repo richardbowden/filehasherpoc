@@ -9,7 +9,7 @@ int SyncDirMask_Recursive;
 typedef struct sync_directory
 {
     char *root;
-    int options;
+    int option_flags;
 
     size_t files_count;
     file_t *files[]; //array

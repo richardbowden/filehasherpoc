@@ -32,7 +32,24 @@ typedef struct file_s
     // struct stat f_info;  /**file info */
     int type;          /** file or directory or maybe symlink */
     size_t block_size; /**the block_size selected for this file */
-    size_t size;       /**total file size */
+    // size_t size;       /**total file size */
+
+    //############################################################
+    //################  file info - from stat  ###################
+    //############################################################
+    size_t size; /** total file size */
+    uid_t uid;   /** User ID */
+    gid_t gid;   /** Group ID */
+
+//TODO:(rich) abstract this to our tie values, so we do not need custom code for each platforms time def
+#if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+    struct timespec atimespec; /* time of last access */
+    struct timespec mtimespec; /* last data modification */
+    struct timespec ctimespec; /* last status change*/
+#else
+#error add a, m and c time for linux
+#endif
+    //###########################################################
 
     double hash_scan_time; /**number of seconds it took to hash the file */
 

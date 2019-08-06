@@ -9,6 +9,7 @@
 #include "directories.h"
 #include <unistd.h>
 #include "debug.h"
+#include "directory_hblk.h"
 
 size_t file_counter = 0;
 size_t dir_counter = 0;
@@ -17,6 +18,9 @@ int cc = 0;
 
 int main(int argc, char *argv[])
 {
+
+    printf("%lu\n", sizeof(struct timespec));
+    printf("%lu\n", sizeof(long));
 
     //    file_fifo_t file_queue;
 
@@ -61,6 +65,9 @@ int main(int argc, char *argv[])
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
     DEBUG_PRINT("full scan took: %f", time_taken);
+
+    sync_dir_write_file("testdump.hblk", sd );
+
     // sync_directory *sd = new_sync_dir(ff, file_queue.count, SyncDirMask_Recursive);
     // sync_dir_add_contents(&file_queue, sd);
 

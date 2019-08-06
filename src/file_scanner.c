@@ -88,6 +88,14 @@ file_t *new_file(const char *file, const struct stat *f_info)
     f->block_size = BLOCK_SIZE;
     f->size = f_info->st_size;
 
+#if !defined(_POSIX_C_SOURCE) || defined(_DARWIN_C_SOURCE)
+    f->atimespec = f_info->st_atimespec; /* time of last access */
+    f->mtimespec = f_info->st_mtimespec; /* last data modification */
+    f->ctimespec = f_info->st_ctimespec; /* last status change*/
+#else
+#error add a, m and c time for linux
+#endif
+
     block_t *b = (block_t *)calloc(number_of_blocks, sizeof(block_t));
 
     f->blocks = b;
