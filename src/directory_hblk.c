@@ -76,9 +76,25 @@ size_t sync_dir_write_file(char *file, sync_directory *sd)
 
         //a,m and ctime
 //        printf ("\n\n\n%ld\n", sizeof(sd->files[i]->atimespec));
-//        fwrite(&sd->files[i]->atimespec, sizeof(sd->files[i]->atimespec), 1, h);
-//        fwrite(&sd->files[i]->mtimespec, sizeof(sd->files[i]->mtimespec), 1, h);
-//        fwrite(&sd->files[i]->ctimespec, sizeof(sd->files[i]->ctimespec), 1, h);
+        
+        fwrite(&sd->files[i]->atimespec, sizeof(sd->files[i]->atimespec), 1, h);
+        fwrite(&sd->files[i]->mtimespec, sizeof(sd->files[i]->mtimespec), 1, h);
+        fwrite(&sd->files[i]->ctimespec, sizeof(sd->files[i]->ctimespec), 1, h);
+        
+        // add blocks
+
+        fwrite(&sd->files[i]->block_count, sizeof(sd->files[i]->block_count), 1, h);
+        
+        int cbc = sd->files[i]->block_count;
+        
+        size_t hsize = sizeof(sd->files[i]->blocks[0].hash[0]);
+        
+        for (int bi = 0; bi < cbc; bi++) {
+            fwrite(&sd->files[i]->blocks[bi].hash[3], hsize, 1, h);
+            fwrite(&sd->files[i]->blocks[bi].hash[2], hsize, 1, h);
+            fwrite(&sd->files[i]->blocks[bi].hash[1], hsize, 1, h);
+            fwrite(&sd->files[i]->blocks[bi].hash[0], hsize, 1, h);
+        }
     }
 
     fclose(h);

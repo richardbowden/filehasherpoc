@@ -180,7 +180,7 @@ void hash_file(file_t *f)
 
         block_counter += 1;
     }
-
+    f->block_count = block_counter;
     fclose(fp);
 }
 

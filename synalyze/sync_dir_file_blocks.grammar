@@ -27,6 +27,16 @@
             <number name="size" id="16" type="integer" length="64" lengthunit="bit"/>
             <number name="uid" id="17" type="integer" length="32" lengthunit="bit"/>
             <number name="gid" id="18" type="integer" length="32" lengthunit="bit"/>
+            <structref name="atimespec" id="24" fillcolor="FFEC3F" structure="id:20"/>
+            <structref name="mtimespec" id="25" structure="id:20"/>
+            <structref name="ctimespec" id="26" structure="id:20"/>
+            <number name="block_count" id="30" type="integer" length="64" lengthunit="bit"/>
+            <structure name="blocks" id="27" repeatmax="block_count" endian="little">
+                <number name="hash3" id="29" type="integer" length="32" lengthunit="bit"/>
+                <number name="hash2" id="32" type="integer" length="32" lengthunit="bit"/>
+                <number name="hash1" id="33" type="integer" length="32" lengthunit="bit"/>
+                <number name="hash0" id="34" type="integer" length="32" lengthunit="bit"/>
+            </structure>
         </structure>
         <structure name="timespec" id="20" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
             <number name="tv_sec" id="21" type="integer" length="8"/>
