@@ -3,6 +3,8 @@
 #include "directories.h"
 #include "debug.h"
 #include <time.h>
+#include <string.h>
+#include <assert.h>
 
 int SyncDirMask_None = 1 << 0;
 int SyncDirMask_Recursive = 1 << 1;
@@ -39,6 +41,9 @@ sync_directory *sync_dir_scan(char *root, int options)
     s = clock();
 
     cur_file = fs_fifo_pop(&queue);
+
+    assert(cur_file->file_abs[0] == '/');
+
     while (cur_file != NULL)
     {
         DEBUG_PRINT("%s\n", cur_file->file_abs);

@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
     clock_t t;
     t = clock();
 
-    char *ff;
+    char *ff = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "d:")) != -1)
+    while ((opt = getopt(argc, argv, "d:r:")) != -1)
     {
         switch (opt)
         {
@@ -38,7 +38,12 @@ int main(int argc, char *argv[])
             printf("f:%s\n", optarg);
             ff = strdup(optarg);
             break;
-
+        case 'r':
+            ff = strdup(optarg);
+            sync_directory *sd = NULL;
+            sync_dir_read_file(ff, sd);
+                exit(EXIT_SUCCESS);
+            break;
         default:
             printf("invalid arg\n");
             exit(EXIT_FAILURE);

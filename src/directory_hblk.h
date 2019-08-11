@@ -8,5 +8,6 @@ int SyncDirMajor;
 int SyncDirMinor;
 
 size_t sync_dir_write_file(char *file, sync_directory *sd);
+void sync_dir_read_file(char *file, sync_directory *sd);
 
 #endif

@@ -7,6 +7,7 @@
 #include "meowhash.h"
 #include "debug.h"
 #include <time.h>
+#include <assert.h>
 
 #define KILOBYTE 1024
 #define MEGABYTE (KILOBYTE * KILOBYTE)
@@ -37,7 +38,7 @@ static int root_length = 0;
 
 void file_fifo_add(file_fifo_t *list, file_t *file)
 {
-
+    assert(file->file_abs[0] == '/');
     if (list->head == NULL)
     {
         list->head = file;
@@ -59,13 +60,16 @@ void file_fifo_add(file_fifo_t *list, file_t *file)
 
 file_t *new_file(const char *file, const struct stat *f_info)
 {
-
+//    printf("%d - %s\n", file[0], file);
+    assert(file[0] == '/');
+    
     int cur_file_len = strlen(file);
     int rel_len = cur_file_len - root_length - 1;
     int rel_start = root_length + 1;
 
     char *rel_path;
-    rel_path = malloc(rel_len * sizeof(char));
+    
+    rel_path = malloc(rel_len +1 * sizeof(char));
     strncpy(rel_path, file + rel_start, rel_len);
     rel_path[rel_len] = '\0'; // ensure null terminated string
 
@@ -80,11 +84,17 @@ file_t *new_file(const char *file, const struct stat *f_info)
     }
 
     file_t *f;
-    f = calloc(1, sizeof(file_t));
+    f = (file_t*)calloc(1, sizeof(file_t));
 
-    f->file_abs = strdup(file);
+    char *my_file_abs = strdup(file);
+    
+    
+    f->file_abs = my_file_abs;
     f->file_rel = rel_path;
-
+    
+    f->uid = f_info->st_uid;
+    f->gid = f_info->st_gid;
+    
     f->block_size = BLOCK_SIZE;
     f->size = f_info->st_size;
 
@@ -99,7 +109,6 @@ file_t *new_file(const char *file, const struct stat *f_info)
     block_t *b = (block_t *)calloc(number_of_blocks, sizeof(block_t));
 
     f->blocks = b;
-
     return f;
 }
 
@@ -175,8 +184,8 @@ void hash_file(file_t *f)
         f->blocks[block_counter].hash[2] = MeowU32From(Hash, 2);
         f->blocks[block_counter].hash[1] = MeowU32From(Hash, 1);
         f->blocks[block_counter].hash[0] = MeowU32From(Hash, 0);
-
-        //        printf("file: %s, block: %zu, total_bytes: %zu, current_bytes: %zu\n", f->file, block_counter, total_read, cur_bytes_read);
+        DEBUG_PRINT("block: %zu\n", block_counter);
+        DEBUG_HASH(f->blocks[block_counter].hash);
 
         block_counter += 1;
     }
@@ -192,7 +201,6 @@ file_t *fs_fifo_pop(file_fifo_t *list)
     }
 
     file_t *head = list->head;
-
     if (head->next != NULL)
     {
         list->head = head->next;
@@ -204,7 +212,6 @@ file_t *fs_fifo_pop(file_fifo_t *list)
     }
     else
     {
-        //        head = list->head;
         list->tail = NULL;
         list->head = NULL;
         list->count = 0;
@@ -223,17 +230,15 @@ file_fifo_t *new_file_fifo()
 int file_handler(const char *cur_file, const struct stat *f_stat, int i)
 {
 
-    file_t *f;
+    file_t *f = NULL;
     switch (i)
     {
         //                case FTW_d:
         //            f = new_file(cur_file);
         //                    break;
     case FTW_F:
-
         f = new_file(cur_file, f_stat);
-
-        f->type = FileTypeFile;
+        f->type = 77;
 
         scanned_bytes += f_stat->st_size;
         scanned_files++;
@@ -280,7 +285,7 @@ int fs_get_files(char *root_dir, file_fifo_t *queue)
     //    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
     //    DEBUG_PRINT("\n");
 
-    if (res)
+	    if (res)
     {
         printf("fucked");
         exit(EXIT_FAILURE);

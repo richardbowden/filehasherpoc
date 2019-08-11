@@ -1,6 +1,6 @@
 
 // #ifdef DEBUG
-#define DEBUG_TEST 1
+#define DEBUG_TEST 0
 // #else
 // #define DEBUG_TEST 0
 // #endif
@@ -13,3 +13,9 @@
                     __LINE__, __FUNCTION__, ##args);             \
     } while (0)
 
+
+#define DEBUG_HASH(hash)\
+({\
+        if (DEBUG_TEST)                                                                 \
+            DEBUG_PRINT("%08X-%08X-%08X-%08X\n", hash[3], hash[2], hash[1], hash[0]);     \
+                        }) \

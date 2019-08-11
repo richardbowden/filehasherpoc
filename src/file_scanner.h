@@ -12,7 +12,7 @@ size_t BLOCK_SIZE;
  *
  *  128bit hash for each chunk_size
  */
-typedef struct block_s
+typedef struct
 {
     size_t offset; //where the block starts
     int hash[4];   //the hash, its 128bit split in to 4, see https://github.com/cmuratori/meow_hash
@@ -26,8 +26,8 @@ int FileTypeDir;
  */
 typedef struct file_s
 {
-    const char *file_abs; //** absolute path to the file */
-    const char *file_rel; /** relative path to the file, minus base path */
+    char *file_abs; //** absolute path to the file */
+    char *file_rel; /** relative path to the file, minus base path */
 
     // struct stat f_info;  /**file info */
     int type;          /** file or directory or maybe symlink */
