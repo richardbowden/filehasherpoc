@@ -238,7 +238,7 @@ int file_handler(const char *cur_file, const struct stat *f_stat, int i)
         //                    break;
     case FTW_F:
         f = new_file(cur_file, f_stat);
-        f->type = 77;
+        f->type = FileTypeFile;
 
         scanned_bytes += f_stat->st_size;
         scanned_files++;
