@@ -16,9 +16,9 @@
             <structref name="file_blk" id="9" repeatmax="file_count" structure="id:8"/>
         </structure>
         <structure name="file_blk" id="8" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
-            <binary name="File Header" mustmatch="yes" id="11" fillcolor="FF6374" length="4">
+            <binary name="File Header" mustmatch="yes" id="11" fillcolor="FF6374" length="8">
                 <fixedvalues>
-                    <fixedvalue name="sss" value="46484452"/>
+                    <fixedvalue name="sss" value="8946484452898686"/>
                 </fixedvalues>
             </binary>
             <number name="file_abs_len" id="12" type="integer" length="8"/>
