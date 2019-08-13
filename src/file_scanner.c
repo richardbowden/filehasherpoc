@@ -64,14 +64,14 @@ file_t *new_file(const char *file, const struct stat *f_info)
     assert(file[0] == '/');
     
     int cur_file_len = strlen(file);
-    int rel_len = cur_file_len - root_length - 1;
-    int rel_start = root_length + 1;
-
+    int rel_len = cur_file_len - root_length;
+    int rel_start = root_length;
+    rel_start++; //add one to skip past the / between the root path and the relative path
     char *rel_path;
     
-    rel_path = malloc(rel_len +1 * sizeof(char));
+    rel_path = malloc(rel_len * sizeof(char)); //+1 to allow space for \0 (null)
     strncpy(rel_path, file + rel_start, rel_len);
-    rel_path[rel_len] = '\0'; // ensure null terminated string
+    rel_path[rel_len-1] = '\0'; // ensure null terminated string
 
     DEBUG_PRINT("rel_path: %s\n", rel_path);
 
@@ -279,6 +279,11 @@ int fs_get_files(char *root_dir, file_fifo_t *queue)
     scanned_files = 0;
 
     root_length = strlen(root_dir);
+    
+    if (root_dir[root_length-1] == '/'){
+        root_dir[root_length-1] = '\0';
+        root_length -= 1;
+    }
 
     int res = ftw(root_dir, file_handle, 32);
 
