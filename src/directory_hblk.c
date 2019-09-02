@@ -231,7 +231,6 @@ size_t sync_dir_write_file(char *file, sync_directory *sd)
                    sd->files[i]->blocks[bi].hash[1],
                    sd->files[i]->blocks[bi].hash[0]
                    );
-            
             printf("%08X-%08X-%08X-%08X\n",
                    sd->files[i]->blocks[bi].hash[3],
                    sd->files[i]->blocks[bi].hash[2],

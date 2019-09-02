@@ -15,3 +15,9 @@ build the binary
 run to tool to hash a file
 
     ./build/filescanner /a/path/to/file.mpg
+
+
+
+editor things - vim 
+
+sudo port install cmake cquery cscope direnv git-flow

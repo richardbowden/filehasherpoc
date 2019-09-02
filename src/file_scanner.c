@@ -1,13 +1,13 @@
 #include "file_scanner.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <ftw.h>
-#include "meowhash.h"
 #include "debug.h"
-#include <time.h>
+#include "meowhash.h"
 #include <assert.h>
+#include <ftw.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
 
 #define KILOBYTE 1024
 #define MEGABYTE (KILOBYTE * KILOBYTE)
@@ -31,25 +31,22 @@ int FileTypeFile = 0;
 int FileTypeDir = 1;
 
 // Globals local to this file @THREADS
-static file_fifo_t *file_queue;
+static file_fifo_t* file_queue;
 static size_t scanned_bytes;
 static size_t scanned_files;
 static int root_length = 0;
 
-void file_fifo_add(file_fifo_t *list, file_t *file)
+void file_fifo_add(file_fifo_t* list, file_t* file)
 {
     assert(file->file_abs[0] == '/');
-    if (list->head == NULL)
-    {
+    if (list->head == NULL) {
         list->head = file;
         list->tail = file;
         list->head->prev = NULL;
         list->head->next = NULL;
         list->tail->next = NULL;
         list->tail->prev = NULL;
-    }
-    else
-    {
+    } else {
         list->tail->next = file;
         file->prev = list->tail;
         list->tail = file;
@@ -58,43 +55,41 @@ void file_fifo_add(file_fifo_t *list, file_t *file)
     list->count++;
 }
 
-file_t *new_file(const char *file, const struct stat *f_info)
+file_t* new_file(const char* file, const struct stat* f_info)
 {
-//    printf("%d - %s\n", file[0], file);
+    //    printf("%d - %s\n", file[0], file);
     assert(file[0] == '/');
-    
+
     int cur_file_len = strlen(file);
     int rel_len = cur_file_len - root_length;
     int rel_start = root_length;
     rel_start++; //add one to skip past the / between the root path and the relative path
-    char *rel_path;
-    
+    char* rel_path;
+
     rel_path = malloc(rel_len * sizeof(char)); //+1 to allow space for \0 (null)
     strncpy(rel_path, file + rel_start, rel_len);
-    rel_path[rel_len-1] = '\0'; // ensure null terminated string
+    rel_path[rel_len - 1] = '\0'; // ensure null terminated string
 
     DEBUG_PRINT("rel_path: %s\n", rel_path);
 
     size_t number_of_blocks = f_info->st_size / BLOCK_SIZE;
     size_t last_block_size = f_info->st_size % BLOCK_SIZE;
 
-    if (last_block_size != 0)
-    {
+    if (last_block_size != 0) {
         number_of_blocks += 1;
     }
 
-    file_t *f;
+    file_t* f;
     f = (file_t*)calloc(1, sizeof(file_t));
 
-    char *my_file_abs = strdup(file);
-    
-    
+    char* my_file_abs = strdup(file);
+
     f->file_abs = my_file_abs;
     f->file_rel = rel_path;
-    
+
     f->uid = f_info->st_uid;
     f->gid = f_info->st_gid;
-    
+
     f->block_size = BLOCK_SIZE;
     f->size = f_info->st_size;
 
@@ -106,7 +101,7 @@ file_t *new_file(const char *file, const struct stat *f_info)
 #error add a, m and c time for linux
 #endif
 
-    block_t *b = (block_t *)calloc(number_of_blocks, sizeof(block_t));
+    block_t* b = (block_t*)calloc(number_of_blocks, sizeof(block_t));
 
     f->blocks = b;
     return f;
@@ -157,13 +152,12 @@ void readable_fs(double size /*in bytes*/, char **buf)
 }
 #endif
 
-void hash_file(file_t *f)
+void hash_file(file_t* f)
 {
-    FILE *fp;
+    FILE* fp;
     fp = fopen(f->file_abs, "rb");
 
-    if (fp == NULL)
-    {
+    if (fp == NULL) {
         fprintf(stderr, "failed to open file: %s\n", f->file_abs);
         exit(EXIT_FAILURE);
     }
@@ -171,47 +165,59 @@ void hash_file(file_t *f)
     size_t cur_bytes_read = 0;
     size_t total_read = 0;
     size_t block_counter = 0;
-    char buffer[BLOCK_SIZE]; //on the stack so its fast
+    char unsigned buffer[BLOCK_SIZE]; //on the stack so its fast
 
-    while ((cur_bytes_read = fread(buffer, sizeof(char), BLOCK_SIZE, fp)) > 0)
-    {
+    meow_state* ms = (meow_state*)calloc(1, sizeof(meow_state));
+
+    MeowBegin(ms, &MeowDefaultSeed);
+
+    while ((cur_bytes_read = fread(buffer, sizeof(char), BLOCK_SIZE, fp)) > 0) {
 
         total_read += cur_bytes_read;
 
-        meow_u128 Hash = MeowHash(MeowDefaultSeed, cur_bytes_read, buffer);
+        MeowAbsorb(ms, cur_bytes_read, &buffer);
+        
+         meow_u128 Hash = MeowHash(MeowDefaultSeed, cur_bytes_read, buffer);
         f->blocks[block_counter].offset = total_read;
-        f->blocks[block_counter].hash[3] = MeowU32From(Hash, 3);
-        f->blocks[block_counter].hash[2] = MeowU32From(Hash, 2);
-        f->blocks[block_counter].hash[1] = MeowU32From(Hash, 1);
-        f->blocks[block_counter].hash[0] = MeowU32From(Hash, 0);
+                f->blocks[block_counter].hash[3] = MeowU32From(Hash, 3);
+                f->blocks[block_counter].hash[2] = MeowU32From(Hash, 2);
+                f->blocks[block_counter].hash[1] = MeowU32From(Hash, 1);
+                f->blocks[block_counter].hash[0] = MeowU32From(Hash, 0);
+
         DEBUG_PRINT("block: %zu\n", block_counter);
         DEBUG_HASH(f->blocks[block_counter].hash);
 
         block_counter += 1;
     }
+
+    meow_u128 whole_file_hash = MeowEnd(ms, NULL);
+    
+    printf("file: %s, whole file hash: %08X-%08X-%08X-%08X\n",
+           f->file_rel,
+           MeowU32From(whole_file_hash, 3),
+           MeowU32From(whole_file_hash, 2),
+           MeowU32From(whole_file_hash, 1),
+           MeowU32From(whole_file_hash, 0));
+        
     f->block_count = block_counter;
     fclose(fp);
 }
 
-file_t *fs_fifo_pop(file_fifo_t *list)
+file_t* fs_fifo_pop(file_fifo_t* list)
 {
-    if (list->head == NULL)
-    {
+    if (list->head == NULL) {
         return NULL;
     }
 
-    file_t *head = list->head;
-    if (head->next != NULL)
-    {
+    file_t* head = list->head;
+    if (head->next != NULL) {
         list->head = head->next;
         list->head->prev = NULL;
 
         head->next = NULL;
         head->prev = NULL;
         list->count--;
-    }
-    else
-    {
+    } else {
         list->tail = NULL;
         list->head = NULL;
         list->count = 0;
@@ -220,19 +226,18 @@ file_t *fs_fifo_pop(file_fifo_t *list)
     return head;
 }
 
-file_fifo_t *new_file_fifo()
+file_fifo_t* new_file_fifo()
 {
-    file_fifo_t *f;
+    file_fifo_t* f;
     f = calloc(1, sizeof(file_fifo_t));
     return f;
 }
 
-int file_handler(const char *cur_file, const struct stat *f_stat, int i)
+int file_handler(const char* cur_file, const struct stat* f_stat, int i)
 {
 
-    file_t *f = NULL;
-    switch (i)
-    {
+    file_t* f = NULL;
+    switch (i) {
         //                case FTW_d:
         //            f = new_file(cur_file);
         //                    break;
@@ -262,14 +267,14 @@ int file_handler(const char *cur_file, const struct stat *f_stat, int i)
     return 0;
 }
 
-int (*file_handle)(const char *f, const struct stat *f_stat, int i) = file_handler;
+int (*file_handle)(const char* f, const struct stat* f_stat, int i) = file_handler;
 
 // file_fifo_t *scan_files(char *root)
 // {
 //     file_fifo_t *queue
 // }
 
-int fs_get_files(char *root_dir, file_fifo_t *queue)
+int fs_get_files(char* root_dir, file_fifo_t* queue)
 {
     //    DEBUG_PRINT("root_dir_to_scan: %s\n", root_dir);
 
@@ -279,9 +284,9 @@ int fs_get_files(char *root_dir, file_fifo_t *queue)
     scanned_files = 0;
 
     root_length = strlen(root_dir);
-    
-    if (root_dir[root_length-1] == '/'){
-        root_dir[root_length-1] = '\0';
+
+    if (root_dir[root_length - 1] == '/') {
+        root_dir[root_length - 1] = '\0';
         root_length -= 1;
     }
 
@@ -290,8 +295,7 @@ int fs_get_files(char *root_dir, file_fifo_t *queue)
     //    DEBUG_PRINT("scanned_files: %ld\r", scanned_files);
     //    DEBUG_PRINT("\n");
 
-	    if (res)
-    {
+    if (res) {
         printf("fucked");
         exit(EXIT_FAILURE);
     }
