@@ -37,6 +37,20 @@ void sync_dir_read_file(char *file, sync_directory *sd)
 
     printf("%d\n", r);
 
+    //hostname
+    size_t hostname_size;
+    fread(&hostname_size, sizeof(size_t), 1, h);
+
+    char *hostname = malloc(hostname_size);
+    fread(hostname, hostname_size, 1, h);
+
+    //set_name
+    size_t set_name_size;
+    fread(&set_name_size, sizeof(size_t), 1, h);
+
+    char *set_name = malloc(set_name_size);
+    fread(set_name, set_name_size, 1, h);
+    
     int major;
     fread(&major, sizeof(int), 1, h);
 
@@ -151,6 +165,16 @@ size_t sync_dir_write_file(char *file, sync_directory *sd)
 
     //    total += sizeof(SyncDirSignature);
 
+    //hostname
+    size_t hostname_size = strlen(sd->hostname)+1;
+    fwrite(&hostname_size, sizeof(hostname_size), 1, h);
+    fwrite(sd->hostname, hostname_size, 1, h);
+
+    //set_name
+    size_t set_name_size = strlen(sd->set_name)+1;
+    fwrite(&set_name_size, sizeof(set_name_size), 1, h);
+    fwrite(sd->set_name, set_name_size, 1, h);
+    
     //version
     size_t ver_maj_size = sizeof SyncDirMajor;
     size_t ver_min_size = sizeof SyncDirMinor;

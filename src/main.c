@@ -10,14 +10,24 @@
 #include <unistd.h>
 #include "debug.h"
 #include "directory_hblk.h"
+#include <unistd.h>
+
+char *hostname;
 
 size_t file_counter = 0;
 size_t dir_counter = 0;
 
 int cc = 0;
 
+void get_hostname(){
+    hostname = (char*)calloc(1, _SC_HOST_NAME_MAX+1);
+    gethostname(hostname, _SC_HOST_NAME_MAX+1);
+}
+
 int main(int argc, char *argv[])
 {
+    
+    get_hostname();
 
     printf("%lu\n", sizeof(struct timespec));
     printf("%lu\n", sizeof(long));
@@ -28,8 +38,9 @@ int main(int argc, char *argv[])
     t = clock();
 
     char *ff = NULL;
+    char *set_name = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "d:r:")) != -1)
+    while ((opt = getopt(argc, argv, "d:r:s:")) != -1)
     {
         switch (opt)
         {
@@ -44,6 +55,9 @@ int main(int argc, char *argv[])
             sync_dir_read_file(ff, sd);
                 exit(EXIT_SUCCESS);
             break;
+        case 's':
+            set_name = strdup(optarg);
+            break;
         default:
             printf("invalid arg\n");
             exit(EXIT_FAILURE);
@@ -56,22 +70,30 @@ int main(int argc, char *argv[])
         fprintf(stderr, "root dir not set in -d option\n");
         exit(EXIT_FAILURE);
     }
+    
+    if (!set_name){
+        set_name = strdup("default");
+    }
+    
+    printf("set_name: %s\n", set_name);
 
     sync_directory *sd;
     sd = sync_dir_scan(ff, SyncDirMask_Recursive);
-
     if (sd == NULL)
     {
         fprintf(stderr, "sync_dir_scan failed, jerk\n");
         exit(EXIT_FAILURE);
     }
+    
+    sd->hostname = strdup(hostname);
+    sd->set_name = strdup(set_name);
 
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
     DEBUG_PRINT("full scan took: %f", time_taken);
 
-    sync_dir_write_file("testdump.hblk", sd );
+    sync_dir_write_file("testdump.hblk", sd);
 
     // sync_directory *sd = new_sync_dir(ff, file_queue.count, SyncDirMask_Recursive);
     // sync_dir_add_contents(&file_queue, sd);

@@ -10,6 +10,8 @@ typedef struct sync_directory
 {
     char *root;
     int option_flags;
+    char *hostname;
+    char *set_name;
 
     size_t files_count;
     file_t *files[]; //array
