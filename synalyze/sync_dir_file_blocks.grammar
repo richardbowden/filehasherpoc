@@ -10,45 +10,45 @@
             </binary>
             <number name="hostname_len" id="3" type="integer" length="8"/>
             <string name="hostname" id="4" type="fixed-length" length="hostname_len"/>
-            <number name="set_name_len" id="39" type="integer" length="8"/>
-            <string name="set_name" id="40" type="fixed-length" length="set_name_len"/>
-            <number name="version_major" id="5" type="integer" length="4"/>
-            <number name="version_minor" id="6" type="integer" length="4"/>
-            <number name="base_path_len" id="7" type="integer" length="8"/>
-            <string name="base_path" id="8" type="fixed-length" length="base_path_len"/>
-            <number name="file_count" id="9" type="integer" length="8"/>
-            <structref name="file_blk" id="11" repeatmax="file_count" structure="id:10"/>
+            <number name="set_name_len" id="5" type="integer" length="8"/>
+            <string name="set_name" id="6" type="fixed-length" length="set_name_len"/>
+            <number name="version_major" id="7" type="integer" length="4"/>
+            <number name="version_minor" id="8" type="integer" length="4"/>
+            <number name="base_path_len" id="9" type="integer" length="8"/>
+            <string name="base_path" id="10" type="fixed-length" length="base_path_len"/>
+            <number name="file_count" id="11" type="integer" length="8"/>
+            <structref name="file_blk" id="13" repeatmax="file_count" structure="id:12"/>
         </structure>
-        <structure name="file_blk" id="10" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
-            <binary name="File Header" mustmatch="yes" id="13" fillcolor="FF6374" length="8">
+        <structure name="file_blk" id="12" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <binary name="File Header" mustmatch="yes" id="15" fillcolor="FF6374" length="8">
                 <fixedvalues>
                     <fixedvalue name="sss" value="8946484452898686"/>
                 </fixedvalues>
             </binary>
-            <number name="file_abs_len" id="14" type="integer" length="8"/>
-            <string name="file_abs" id="15" fillcolor="00FFDD" type="fixed-length" length="file_abs_len"/>
-            <number name="file_rel_len" id="16" type="integer" length="8"/>
-            <string name="file_rel" id="17" fillcolor="00FFDD" type="fixed-length" length="file_rel_len"/>
-            <number name="type" id="18" type="integer" length="32" lengthunit="bit"/>
-            <number name="block_size" id="19" type="integer" length="32" lengthunit="bit"/>
-            <number name="size" id="20" type="integer" length="64" lengthunit="bit"/>
-            <number name="uid" id="21" type="integer" length="32" lengthunit="bit"/>
-            <number name="gid" id="22" type="integer" length="32" lengthunit="bit"/>
-            <structref name="atimespec" id="24" fillcolor="FF682E" structure="id:23"/>
-            <structref name="mtimespec" id="25" structure="id:23"/>
-            <structref name="ctimespec" id="26" structure="id:23"/>
-            <number name="block_count" id="27" type="integer" length="64" lengthunit="bit"/>
-            <structure name="blocks" id="28" repeatmax="block_count" endian="little">
-                <number name="offset" id="29" fillcolor="B7D0FF" type="integer" length="64" lengthunit="bit"/>
-                <number name="hash3" id="30" fillcolor="FFB18B" type="integer" length="4"/>
-                <number name="hash2" id="31" fillcolor="FFC970" type="integer" length="4"/>
-                <number name="hash1" id="32" fillcolor="FFED36" type="integer" length="4"/>
-                <number name="hash0" id="33" fillcolor="FFBE00" type="integer" length="4"/>
+            <number name="file_abs_len" id="16" type="integer" length="8"/>
+            <string name="file_abs" id="17" fillcolor="00FFDD" type="fixed-length" length="file_abs_len"/>
+            <number name="file_rel_len" id="18" type="integer" length="8"/>
+            <string name="file_rel" id="19" fillcolor="00FFDD" type="fixed-length" length="file_rel_len"/>
+            <number name="type" id="20" type="integer" length="32" lengthunit="bit"/>
+            <number name="block_size" id="21" type="integer" length="32" lengthunit="bit"/>
+            <number name="size" id="22" type="integer" length="64" lengthunit="bit"/>
+            <number name="uid" id="23" type="integer" length="32" lengthunit="bit"/>
+            <number name="gid" id="24" type="integer" length="32" lengthunit="bit"/>
+            <structref name="atimespec" id="26" fillcolor="FF682E" structure="id:25"/>
+            <structref name="mtimespec" id="27" structure="id:25"/>
+            <structref name="ctimespec" id="28" structure="id:25"/>
+            <number name="block_count" id="29" type="integer" length="64" lengthunit="bit"/>
+            <structure name="blocks" id="30" repeatmax="block_count" endian="little">
+                <number name="offset" id="31" fillcolor="B7D0FF" type="integer" length="64" lengthunit="bit"/>
+                <number name="hash3" id="32" fillcolor="FFB18B" type="integer" length="4"/>
+                <number name="hash2" id="33" fillcolor="FFC970" type="integer" length="4"/>
+                <number name="hash1" id="34" fillcolor="FFED36" type="integer" length="4"/>
+                <number name="hash0" id="35" fillcolor="FFBE00" type="integer" length="4"/>
             </structure>
         </structure>
-        <structure name="timespec" id="23" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
-            <number name="tv_sec" mustmatch="yes" id="36" type="integer" length="8" endian="little"/>
-            <number name="tv_nsec" mustmatch="yes" id="37" type="integer" length="8" endian="little"/>
+        <structure name="timespec" id="25" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <number name="tv_sec" mustmatch="yes" id="38" type="integer" length="8" endian="little"/>
+            <number name="tv_nsec" mustmatch="yes" id="39" type="integer" length="8" endian="little"/>
         </structure>
     </grammar>
 </ufwb>

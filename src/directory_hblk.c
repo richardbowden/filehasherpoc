@@ -35,8 +35,13 @@ void sync_dir_read_file(char *file, sync_directory *sd)
 
     int r = ((int)memcmp(&file_magic[0], &HSYNCSignature[0], 8));
 
-    printf("%d\n", r);
-
+    if (r){
+        printf("not a valid hblk file\n");
+        exit(EXIT_FAILURE);
+    }else{
+        printf("valid hblk file\n\n");
+    }
+    
     //hostname
     size_t hostname_size;
     fread(&hostname_size, sizeof(size_t), 1, h);
@@ -66,11 +71,18 @@ void sync_dir_read_file(char *file, sync_directory *sd)
     size_t file_count;
     fread(&file_count, sizeof(size_t), 1, h);
 
-    sync_directory *sync_dir_from_file = sync_dir_new(base_path, file_count, 0);
+//    sync_directory *sync_dir_from_file = sync_dir_new(base_path, file_count, 0);
 
+
+
+    printf("hostname:   %s\n", hostname);
+    printf("set_name:   %s\n", set_name);
+    printf("base_path:  %s\n", base_path);
+    printf("file_count: %zu\n", file_count);
+    
     int blk_counter = 0;
     int file_counter = 0;
-
+    
     for (int i = 0; i < file_count; i++)
     {
         uint8_t ss[8];
@@ -124,8 +136,7 @@ void sync_dir_read_file(char *file, sync_directory *sd)
         block_t *b = calloc(block_count, sizeof(block_t));
 
         fread(b, sizeof(block_t), block_count, h);
-
-        printf("%s\n", path_abs);
+        
 #if 0
         for (int bi = 0; bi < block_count; bi++)
         {
@@ -147,6 +158,12 @@ void sync_dir_read_file(char *file, sync_directory *sd)
         file_counter++;
     }
 
+    if (!(file_counter == file_count)){
+        printf("read failed, count miss match expected: %zu, got: %d\n", file_count, file_counter);
+    }else{
+        printf("total_found: %d\n", file_counter);
+    }
+    
     fclose(h);
 }
 
