@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "directory_hblk.h"
 #include <unistd.h>
+#include "database.h"
 
 char *hostname;
 
@@ -28,12 +29,8 @@ int main(int argc, char *argv[])
 {
     
     get_hostname();
-
-    printf("%lu\n", sizeof(struct timespec));
-    printf("%lu\n", sizeof(long));
-
-    //    file_fifo_t file_queue;
-
+    db_init();
+    
     clock_t t;
     t = clock();
 

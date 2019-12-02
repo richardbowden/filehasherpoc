@@ -24,6 +24,21 @@ INCLUDE(CheckCCompilerFlag)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes -mavx2")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes -mavx2")
 
-add_executable(filescanner src/main.c src/file_scanner.c src/file_scanner.h src/directories.c src/directories.h src/debug.h src/directory_hblk.c src/directory_hblk.h)
 
+find_package(SQLite3 REQUIRED)
+
+add_executable(filescanner 
+	src/main.c 
+	src/file_scanner.c 
+	src/file_scanner.h 
+	src/directories.c 
+	src/directories.h 
+	src/debug.h 
+	src/directory_hblk.c 
+	src/directory_hblk.h
+	src/database.h
+	src/database.c
+)
+
+target_link_libraries(filescanner ${SQLite3_LIBRARIES})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
