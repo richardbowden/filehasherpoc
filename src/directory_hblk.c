@@ -62,6 +62,13 @@ void sync_dir_read_file(char *file, sync_directory *sd)
     int minor;
     fread(&minor, sizeof(int), 1, h);
 
+    //timestamps
+    time_t started_at;
+    fread(&started_at, sizeof(time_t), 1, h);
+    
+    time_t finished_at;
+    fread(&finished_at, sizeof(time_t), 1, h);
+    
     size_t base_path_len;
     fread(&base_path_len, sizeof(size_t), 1, h);
 
@@ -79,6 +86,8 @@ void sync_dir_read_file(char *file, sync_directory *sd)
     printf("set_name:   %s\n", set_name);
     printf("base_path:  %s\n", base_path);
     printf("file_count: %zu\n", file_count);
+    printf("started_at: %zu\n", started_at);
+    printf("finished_at: %zu\n", finished_at);
     
     int blk_counter = 0;
     int file_counter = 0;
@@ -201,6 +210,13 @@ size_t sync_dir_write_file(char *file, sync_directory *sd)
     fwrite(&SyncDirMajor, ver_maj_size, 1, h);
     fwrite(&SyncDirMinor, ver_min_size, 1, h);
 
+    //timestamps
+    size_t started_at_size = sizeof(sd->started_at);
+    fwrite(&sd->started_at, started_at_size, 1, h);
+    
+    size_t finished_at_size = sizeof(sd->finished_at);
+    fwrite(&sd->finished_at, finished_at_size, 1, h);
+    
     //base path
     size_t root_size = strlen(sd->root) + 1;
     fwrite(&root_size, sizeof(root_size), 1, h);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ufwb version="1.17">
-    <grammar name="sync_dir_file_blocks" start="id:1" author="Richard Bowden">
+    <grammar name="sync_dir_file_blocks" start="id:1" author="Richard Bowden" fileextension="hblk" uti="public.c-header">
         <description>Grammar for my file format</description>
         <structure name="hash_block_store" id="1" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
             <binary name="signature" mustmatch="yes" id="2" fillcolor="FF6374" length="8">
@@ -14,6 +14,8 @@
             <string name="set_name" id="6" type="fixed-length" length="set_name_len"/>
             <number name="version_major" id="7" type="integer" length="4"/>
             <number name="version_minor" id="8" type="integer" length="4"/>
+            <number name="started_at" id="41" type="integer" length="8"/>
+            <number name="finished_at" id="42" type="integer" length="8"/>
             <number name="base_path_len" id="9" type="integer" length="8"/>
             <string name="base_path" id="10" type="fixed-length" length="base_path_len"/>
             <number name="file_count" id="11" type="integer" length="8"/>

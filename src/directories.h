@@ -12,7 +12,9 @@ typedef struct sync_directory
     int option_flags;
     char *hostname;
     char *set_name;
-
+    time_t started_at;
+    time_t finished_at;
+    
     size_t files_count;
     file_t *files[]; //array
 } sync_directory;

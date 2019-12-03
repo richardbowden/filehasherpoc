@@ -12,6 +12,7 @@
 #include "directory_hblk.h"
 #include <unistd.h>
 #include "database.h"
+#include <time.h>
 
 char *hostname;
 
@@ -75,6 +76,7 @@ int main(int argc, char *argv[])
     printf("set_name: %s\n", set_name);
 
     sync_directory *sd;
+    time_t started = time(NULL);
     sd = sync_dir_scan(ff, SyncDirMask_Recursive);
     if (sd == NULL)
     {
@@ -84,13 +86,18 @@ int main(int argc, char *argv[])
     
     sd->hostname = strdup(hostname);
     sd->set_name = strdup(set_name);
-
+    sd->started_at = started;
+    sd->finished_at = time(NULL);
+    
+//    db_add_set(sd);
+    
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
     DEBUG_PRINT("full scan took: %f", time_taken);
 
     sync_dir_write_file("testdump.hblk", sd);
+	
 
     // sync_directory *sd = new_sync_dir(ff, file_queue.count, SyncDirMask_Recursive);
     // sync_dir_add_contents(&file_queue, sd);
