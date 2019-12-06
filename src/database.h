@@ -4,5 +4,7 @@
 #include "directories.h"
 
 void db_init();
-void db_add_set(sync_directory *sd);
+int db_add_set(sync_directory *sd);
+void db_add_file(file_t *f, int set_id);
+void db_close();
 #endif // __DATABASE

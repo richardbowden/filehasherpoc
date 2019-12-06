@@ -89,7 +89,17 @@ int main(int argc, char *argv[])
     sd->started_at = started;
     sd->finished_at = time(NULL);
     
-//    db_add_set(sd);
+    int set_id = db_add_set(sd);
+    
+    
+    for (int i = 0; i < sd->files_count; i++) {
+        file_t *f = sd->files[i];
+        
+        db_add_file(f, set_id);
+    }
+    
+    db_close();
+    
     
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
