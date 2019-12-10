@@ -14,10 +14,14 @@
 #include "database.h"
 #include <time.h>
 
+int errno;
+
 char *hostname;
 
 size_t file_counter = 0;
 size_t dir_counter = 0;
+
+
 
 int cc = 0;
 
@@ -38,7 +42,12 @@ int main(int argc, char *argv[])
     char *ff = NULL;
     char *set_name = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "d:r:s:")) != -1)
+    
+    bool compare = false;
+    char *primary;
+    char *secondary;
+    
+    while ((opt = getopt(argc, argv, "d:r:s:cP:S:")) != -1)
     {
         switch (opt)
         {
@@ -50,11 +59,24 @@ int main(int argc, char *argv[])
         case 'r':
             ff = strdup(optarg);
             sync_directory *sd = NULL;
-            sync_dir_read_file(ff, sd);
-                exit(EXIT_SUCCESS);
+            sync_dir_read_file(ff, &sd);
+            db_sd_import(sd);
+            exit(EXIT_SUCCESS);
+            break;
+        case 'c':
+            printf("file compare - primary against secondary\n");
+            compare = true;
             break;
         case 's':
             set_name = strdup(optarg);
+            break;
+                
+        case 'P':
+            primary = strdup(optarg);
+            break;
+                
+        case 'S':
+            secondary = strdup(optarg);
             break;
         default:
             printf("invalid arg\n");
@@ -63,6 +85,14 @@ int main(int argc, char *argv[])
         }
     }
 
+//    if (compare){
+//        db_init();
+//        int res;
+//        res = hblk_import(primary);
+//        res = hblk_import(secondary);
+//        res = hblk_compare();
+//    }
+    
     if (!ff)
     {
         fprintf(stderr, "root dir not set in -d option\n");
@@ -89,64 +119,13 @@ int main(int argc, char *argv[])
     sd->started_at = started;
     sd->finished_at = time(NULL);
     
-    int set_id = db_add_set(sd);
-    
-    
-    for (int i = 0; i < sd->files_count; i++) {
-        file_t *f = sd->files[i];
-        
-        db_add_file(f, set_id);
-    }
-    
-    db_close();
-    
-    
     t = clock() - t;
     double time_taken = ((double)t) / CLOCKS_PER_SEC; // in seconds
 
     DEBUG_PRINT("full scan took: %f", time_taken);
 
     sync_dir_write_file("testdump.hblk", sd);
-	
 
-    // sync_directory *sd = new_sync_dir(ff, file_queue.count, SyncDirMask_Recursive);
-    // sync_dir_add_contents(&file_queue, sd);
-
-    //    file_t *cur_file;
-    //    cur_file = file_queue.head;
-    //
-    //    char *h = (char *)malloc(sizeof(char) * 36 + 1);
-    //
-    //    while (cur_file != NULL)
-    //    {
-    //
-    //        for (int cc = 0; cc < cur_file->block_count; cc++)
-    //        {
-    //            //            char h[];
-    //            sprintf(h, "%08X-%08X-%08X-%08X",
-    //                    cur_file->blocks[cc].hash[3],
-    //                    cur_file->blocks[cc].hash[2],
-    //                    cur_file->blocks[cc].hash[1],
-    //                    cur_file->blocks[cc].hash[0]);
-    //
-    //            printf("%s, block: %d, hash: %s, size: %lld, block_size: %zu\n", cur_file->file, cc, h, cur_file->f_info.st_size, cur_file->block_size);
-    //        }
-    //
-    //        cur_file = cur_file->next;
-    //    }
-    //
-    //    printf("actual hashing of %s took %f seconds to hash %d bytes\n", ff, time_taken, 0);
-
-    //should free f but who cares, the OS will do then when the process ends, no point wasting cpu cycles todo somthing the OS can do better
     exit(EXIT_SUCCESS);
 }
 
-//char *get_hash(block_t *block)
-//{
-//
-//    printf("    %08X-%08X-%08X-%08X\n",
-//           MeowU32From(block, 3),
-//           MeowU32From(Hash, 2),
-//           MeowU32From(Hash, 1),
-//           MeowU32From(Hash, 0));
-//}

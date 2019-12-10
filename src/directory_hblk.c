@@ -14,8 +14,9 @@ uint8_t FILEHDRSignature[] = {0x89, 'F', 'H', 'D', 'R', 0x89, 0x86, 0x86};
 int SyncDirMajor = 0;
 int SyncDirMinor = 1;
 
-void sync_dir_read_file(char *file, sync_directory *sd)
+void sync_dir_read_file(char *file, sync_directory **sd)
 {
+    
     size_t total = 0;
     FILE *h;
 
@@ -80,14 +81,21 @@ void sync_dir_read_file(char *file, sync_directory *sd)
 
 //    sync_directory *sync_dir_from_file = sync_dir_new(base_path, file_count, 0);
 
-
-
     printf("hostname:   %s\n", hostname);
     printf("set_name:   %s\n", set_name);
     printf("base_path:  %s\n", base_path);
     printf("file_count: %zu\n", file_count);
     printf("started_at: %zu\n", started_at);
     printf("finished_at: %zu\n", finished_at);
+    
+    *sd = sync_dir_new(base_path, file_count, 0);
+
+    (*sd)->hostname = hostname;
+    (*sd)->set_name = set_name;
+    (*sd)->started_at = started_at;
+    (*sd)->finished_at = finished_at;
+    (*sd)->files_count = file_count;
+    
     
     int blk_counter = 0;
     int file_counter = 0;
@@ -145,6 +153,17 @@ void sync_dir_read_file(char *file, sync_directory *sd)
         block_t *b = calloc(block_count, sizeof(block_t));
 
         fread(b, sizeof(block_t), block_count, h);
+        
+        file_t *f = calloc(1, sizeof(file_t));
+        
+        f->file_abs = path_abs;
+        f->file_rel = path_rel;
+        f->block_count = block_count;
+        f->block_size = block_size;
+        f->gid = gid;
+        
+        (*sd)->files[i] = f;
+        
         
 #if 0
         for (int bi = 0; bi < block_count; bi++)

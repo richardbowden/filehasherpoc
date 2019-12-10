@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "directories.h"
+#include "directory_hblk.h"
 
 static sqlite3 *db;
 void db_create_tables();
@@ -112,7 +113,7 @@ void db_create_tables()
     }
 }
 
-int db_add_set(sync_directory *sd)
+int db_add_set(sync_directory *sd, int in_trans)
 {
     char *add_set = "insert into sets (set_name, base_path, hostname, file_count, started_at, finished_at) values(?,?,?,?,?,?);";
 
@@ -129,16 +130,20 @@ int db_add_set(sync_directory *sd)
     if (res != SQLITE_DONE)
     {
         fprintf(stderr, "database error: %s\n", sqlite3_errmsg(db));
+        sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
         sqlite3_close(db);
         exit(EXIT_FAILURE);
     }
-    sqlite3_finalize(query);
+    
+    if (!in_trans){
+        sqlite3_finalize(query);
+    }
     
     int id = sqlite3_last_insert_rowid(db);
     return id;
 }
 
-void db_add_file(file_t *f, int set_id){
+void db_add_file(file_t *f, int set_id, int in_trans){
     char *add_file = "insert into files (set_id, file_abs, file_rel, size, gid, uid, atimespec, mtimespec, ctimespec, block_count) values(?,?,?,?,?,?,?,?,?,?);";
     
     sqlite3_stmt *query;
@@ -157,12 +162,37 @@ void db_add_file(file_t *f, int set_id){
     int res = sqlite3_step(query);
     if (res != SQLITE_DONE){
         fprintf(stderr, "database error: %s\n", sqlite3_errmsg(db));
+        if (in_trans){
+            sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
+        }
         sqlite3_close(db);
         exit(EXIT_FAILURE);
     }
-    sqlite3_finalize(query);
+    
+    if (!in_trans){
+        sqlite3_finalize(query);
+    }
 }
 
 void db_close(){
     sqlite3_close(db);
 }
+
+
+int db_sd_import(sync_directory *sd){
+    //TODO: need to make an itarator for hblf files
+    sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
+    int set_id = db_add_set(sd, true);
+    for (size_t i = 0; i < sd->files_count; i++) {
+//        db_add_file(sd->files[i], set_id, true);
+        
+        printf("%s\n", sd->files[i]->file_abs);
+        printf("\rfile of X is: %lu", i);
+        fflush(stdout);
+    }
+    
+//    sqlite3_exec(db, "END TRANSACTION", NULL, NULL, NULL);
+    sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+//    sql
+    return 0;
+};
