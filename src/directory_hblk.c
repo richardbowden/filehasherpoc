@@ -95,7 +95,8 @@ void sync_dir_read_file(char *file, sync_directory **sd)
     (*sd)->started_at = started_at;
     (*sd)->finished_at = finished_at;
     (*sd)->files_count = file_count;
-    
+    (*sd)->root = base_path;
+
     
     int blk_counter = 0;
     int file_counter = 0;
@@ -154,27 +155,38 @@ void sync_dir_read_file(char *file, sync_directory **sd)
 
         fread(b, sizeof(block_t), block_count, h);
         
-        file_t *f = calloc(1, sizeof(file_t));
+        file_t *new_f = calloc(1, sizeof(file_t));
         
-        f->file_abs = path_abs;
-        f->file_rel = path_rel;
-        f->block_count = block_count;
-        f->block_size = block_size;
-        f->gid = gid;
+        new_f->file_abs = path_abs;
+        new_f->file_rel = path_rel;
+        new_f->block_count = block_count;
+        new_f->block_size = block_size;
+        new_f->size = file_size;
+        new_f->gid = gid;
+        new_f->uid = uid;
+        new_f->atimespec = *atime;
+        new_f->ctimespec = *ctime;
+        new_f->mtimespec = *mtime;
         
-        (*sd)->files[i] = f;
+        new_f->blocks = b;
         
-        
-#if 0
+#if 1
+//        block_t *block = calloc(block_count-1, sizeof(block_t));
         for (int bi = 0; bi < block_count; bi++)
         {
-
-            printf("%s, %d, ", path_abs, bi);
-            printf("%d, %d, %d, %d, ",
-                   b[bi].hash[3],
-                   b[bi].hash[2],
-                   b[bi].hash[1],
-                   b[bi].hash[0]);
+            
+//            block[bi] = b[bi];
+//            block[bi].hash[3] = b[bi].hash[3];
+//            block[bi].hash[2] = b[bi].hash[2];
+//            block[bi].hash[1] = b[bi].hash[1];
+//            block[bi].hash[0] = b[bi].hash[0];
+//
+//            printf("%s, %d, ", path_abs, bi);
+//            printf("%d, %d, %d, %d, ",
+//                   b[bi].hash[3],
+//                   b[bi].hash[2],
+//                   b[bi].hash[1],
+//                   b[bi].hash[0]);
 
             printf("%08X-%08X-%08X-%08X\n",
                    b[bi].hash[3],
@@ -182,6 +194,9 @@ void sync_dir_read_file(char *file, sync_directory **sd)
                    b[bi].hash[1],
                    b[bi].hash[0]);
         }
+        
+//        new_f->blocks = block;
+        (*sd)->files[i] = new_f;
 #endif
         file_counter++;
     }

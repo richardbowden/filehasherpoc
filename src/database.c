@@ -76,10 +76,12 @@ void db_create_tables()
 
     char *blocks = "create table if not exists blocks (block_id INTEGER PRIMARY KEY,"
                    "file_id INTEGER NOT NULL,"
-                   "blcok3 TEST NOT NULL,"
-                   "blcok2 TEST NOT NULL,"
-                   "blcok1 TEST NOT NULL,"
-                   "blcok0 TEST NOT NULL,"
+                   "block_pos TEXT NOT NULL,"
+                   "block3 TEXT NOT NULL,"
+                   "block2 TEXT NOT NULL,"
+                   "block1 TEXT NOT NULL,"
+                   "block0 TEXT NOT NULL,"
+                   "offset TEXT NOT NULL,"
                    "FOREIGN KEY (file_id) REFERENCES files (file_id)"
                    ");";
 
@@ -143,7 +145,7 @@ int db_add_set(sync_directory *sd, int in_trans)
     return id;
 }
 
-void db_add_file(file_t *f, int set_id, int in_trans){
+int db_add_file(file_t *f, int set_id, int in_trans){
     char *add_file = "insert into files (set_id, file_abs, file_rel, size, gid, uid, atimespec, mtimespec, ctimespec, block_count) values(?,?,?,?,?,?,?,?,?,?);";
     
     sqlite3_stmt *query;
@@ -172,6 +174,46 @@ void db_add_file(file_t *f, int set_id, int in_trans){
     if (!in_trans){
         sqlite3_finalize(query);
     }
+    
+    int id = sqlite3_last_insert_rowid(db);
+    return id;
+}
+
+void db_add_blocks(file_t *f, int file_id, int in_trans){
+    char *add_blocks = "insert into blocks (file_id, block_pos, block3, block2, block1, block0, offset) values(?,?,?,?,?,?,?);";
+    
+    sqlite3_stmt *query;
+    sqlite3_prepare_v2(db, add_blocks, -1, &query, 0);
+    
+    size_t count = f->block_count;
+    
+    for (int i = 0; i<count; i++) {
+        block_t b = f->blocks[i];
+        
+        sqlite3_bind_int(query, 1, file_id);
+        sqlite3_bind_int(query, 2, i+1); //block posistion
+        sqlite3_bind_int(query, 3, b.hash[3]);
+        sqlite3_bind_int(query, 4, b.hash[2]);
+        sqlite3_bind_int(query, 5, b.hash[1]);
+        sqlite3_bind_int(query, 6, b.hash[0]);
+        sqlite3_bind_int(query, 7, b.offset);
+        
+        int res = sqlite3_step(query);
+        
+        if (res != SQLITE_DONE){
+            fprintf(stderr, "database error: %s\n", sqlite3_errmsg(db));
+            if (in_trans){
+                sqlite3_exec(db, "ROLLBACK", NULL, NULL, NULL);
+            }
+            sqlite3_close(db);
+            exit(EXIT_FAILURE);
+        }
+        sqlite3_reset(query);
+    }
+    
+    if (!in_trans){
+        sqlite3_finalize(query);
+    }
 }
 
 void db_close(){
@@ -184,8 +226,8 @@ int db_sd_import(sync_directory *sd){
     sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
     int set_id = db_add_set(sd, true);
     for (size_t i = 0; i < sd->files_count; i++) {
-//        db_add_file(sd->files[i], set_id, true);
-        
+        int id = db_add_file(sd->files[i], set_id, true);
+        db_add_blocks(sd->files[i], id, true);
         printf("%s\n", sd->files[i]->file_abs);
         printf("\rfile of X is: %lu", i);
         fflush(stdout);
