@@ -177,12 +177,13 @@ void hash_file(file_t* f)
 
         MeowAbsorb(ms, cur_bytes_read, &buffer);
         
-         meow_u128 Hash = MeowHash(MeowDefaultSeed, cur_bytes_read, buffer);
+        meow_u128 Hash = MeowHash(MeowDefaultSeed, cur_bytes_read, buffer);
+        f->blocks[block_counter].mode = BM_BLOCKS | BM_HASH_MEOW;
         f->blocks[block_counter].offset = total_read;
-                f->blocks[block_counter].hash[3] = MeowU32From(Hash, 3);
-                f->blocks[block_counter].hash[2] = MeowU32From(Hash, 2);
-                f->blocks[block_counter].hash[1] = MeowU32From(Hash, 1);
-                f->blocks[block_counter].hash[0] = MeowU32From(Hash, 0);
+        f->blocks[block_counter].hash[3] = MeowU32From(Hash, 3);
+        f->blocks[block_counter].hash[2] = MeowU32From(Hash, 2);
+        f->blocks[block_counter].hash[1] = MeowU32From(Hash, 1);
+        f->blocks[block_counter].hash[0] = MeowU32From(Hash, 0);
 
         DEBUG_PRINT("block: %zu\n", block_counter);
         DEBUG_HASH(f->blocks[block_counter].hash);
@@ -198,7 +199,25 @@ void hash_file(file_t* f)
            MeowU32From(whole_file_hash, 2),
            MeowU32From(whole_file_hash, 1),
            MeowU32From(whole_file_hash, 0));
-        
+    
+    printf("%d, %d, %d, %d, ",
+    MeowU32From(whole_file_hash, 3),
+    MeowU32From(whole_file_hash, 2),
+    MeowU32From(whole_file_hash, 1),
+    MeowU32From(whole_file_hash, 0));
+    
+    f->whole_file_hash.hash[3] = MeowU32From(whole_file_hash, 3);
+    f->whole_file_hash.hash[2] = MeowU32From(whole_file_hash, 2);
+    f->whole_file_hash.hash[1] = MeowU32From(whole_file_hash, 1);
+    f->whole_file_hash.hash[0] = MeowU32From(whole_file_hash, 0);
+    f->whole_file_hash.mode = BM_FILE | BM_HASH_MEOW;
+    f->whole_file_hash.offset = 0;
+    
+    printf("whole struct: %lu\n", sizeof(f->whole_file_hash));
+    printf("block hash x1: %lu\n", sizeof(f->whole_file_hash.hash[0]));
+    printf("mode: %lu\n", sizeof(f->whole_file_hash.mode));
+    printf("offset: %lu\n", sizeof(f->whole_file_hash.offset));
+
     f->block_count = block_counter;
     fclose(fp);
 }

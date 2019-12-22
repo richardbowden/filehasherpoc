@@ -21,3 +21,15 @@ run to tool to hash a file
 editor things - vim 
 
 sudo port install cmake cquery cscope direnv git-flow
+
+
+# SQL
+
+Get block info for a file
+
+    select f.file_id, f.file_abs, b.block_pos, b.block0, b.block1, b.block2, b.block3 from blocks as b inner join files as f on b.file_id = f.file_id where f.file_id = 1 order by b.block_pos desc;
+
+
+https://dbdiagram.io/d
+
+https://app.sqldbm.com/PostgreSQL/Draft/

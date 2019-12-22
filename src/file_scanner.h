@@ -5,6 +5,13 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 
+enum block_mode_flags{
+     BM_BLOCKS       = 0x1,
+     BM_FILE         = 0x2,
+    
+     BM_HASH_MEOW    = 0x200,
+};
+
 size_t BLOCK_SIZE;
 
 /*! \brief block_s.
@@ -12,9 +19,10 @@ size_t BLOCK_SIZE;
  *
  *  128bit hash for each chunk_size
  */
-typedef struct
+typedef struct block_s
 {
-    size_t offset; //where the block starts
+    size_t offset;
+    int mode;
     int hash[4];   //the hash, its 128bit split in to 4, see https://github.com/cmuratori/meow_hash
 } block_t;
 
@@ -56,6 +64,8 @@ typedef struct file_s
     struct file_s *next;
     struct file_s *prev;
 
+    block_t whole_file_hash;
+    
     size_t block_count;
     block_t *blocks; /**array of hashes of each block */
 

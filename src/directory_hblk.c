@@ -79,8 +79,6 @@ void sync_dir_read_file(char *file, sync_directory **sd)
     size_t file_count;
     fread(&file_count, sizeof(size_t), 1, h);
 
-//    sync_directory *sync_dir_from_file = sync_dir_new(base_path, file_count, 0);
-
     printf("hostname:   %s\n", hostname);
     printf("set_name:   %s\n", set_name);
     printf("base_path:  %s\n", base_path);
@@ -148,6 +146,10 @@ void sync_dir_read_file(char *file, sync_directory **sd)
         struct timespec *ctime = calloc(1, timespec_s);
         result = fread(ctime, timespec_s, 1, h);
 
+        //read file hash
+        block_t file_hash;
+        fread(&file_hash, sizeof(block_t), 1, h);
+
         size_t block_count;
         fread(&block_count, sizeof(size_t), 1, h);
 
@@ -167,13 +169,14 @@ void sync_dir_read_file(char *file, sync_directory **sd)
         new_f->atimespec = *atime;
         new_f->ctimespec = *ctime;
         new_f->mtimespec = *mtime;
+        new_f->whole_file_hash = file_hash;
         
         new_f->blocks = b;
         
-#if 1
+//#if 1
 //        block_t *block = calloc(block_count-1, sizeof(block_t));
-        for (int bi = 0; bi < block_count; bi++)
-        {
+//        for (int bi = 0; bi < block_count; bi++)
+//        {
             
 //            block[bi] = b[bi];
 //            block[bi].hash[3] = b[bi].hash[3];
@@ -188,16 +191,16 @@ void sync_dir_read_file(char *file, sync_directory **sd)
 //                   b[bi].hash[1],
 //                   b[bi].hash[0]);
 
-            printf("%08X-%08X-%08X-%08X\n",
-                   b[bi].hash[3],
-                   b[bi].hash[2],
-                   b[bi].hash[1],
-                   b[bi].hash[0]);
-        }
+//            printf("%08X-%08X-%08X-%08X\n",
+//                   b[bi].hash[3],
+//                   b[bi].hash[2],
+//                   b[bi].hash[1],
+//                   b[bi].hash[0]);
+//        }
         
 //        new_f->blocks = block;
         (*sd)->files[i] = new_f;
-#endif
+//#endif
         file_counter++;
     }
 
@@ -302,34 +305,16 @@ size_t sync_dir_write_file(char *file, sync_directory *sd)
         fwrite(&sd->files[i]->mtimespec, sizeof(sd->files[i]->mtimespec), 1, h);
         fwrite(&sd->files[i]->ctimespec, sizeof(sd->files[i]->ctimespec), 1, h);
 
+        //whole file hash
+        fwrite(&sd->files[i]->whole_file_hash, sizeof(sd->files[i]->whole_file_hash), 1, h);
+        
         // add blocks
-
         fwrite(&sd->files[i]->block_count, sizeof(sd->files[i]->block_count), 1, h);
-
-        int cbc = sd->files[i]->block_count;
+        size_t cbc = sd->files[i]->block_count;
 
         size_t hsize = sizeof(sd->files[i]->blocks[0]);
-
-        for (int bi = 0; bi < cbc; bi++)
-        {
-
-            fwrite(&sd->files[i]->blocks[bi], hsize, 1, h);
-#if 0
-            printf("%s, %d, ", sd->files[i]->file_abs, bi);
-            printf("%d, %d, %d, %d, ",
-                   sd->files[i]->blocks[bi].hash[3],
-                   sd->files[i]->blocks[bi].hash[2],
-                   sd->files[i]->blocks[bi].hash[1],
-                   sd->files[i]->blocks[bi].hash[0]
-                   );
-            printf("%08X-%08X-%08X-%08X\n",
-                   sd->files[i]->blocks[bi].hash[3],
-                   sd->files[i]->blocks[bi].hash[2],
-                   sd->files[i]->blocks[bi].hash[1],
-                   sd->files[i]->blocks[bi].hash[0]
-                   );
-#endif
-        }
+        
+        fwrite(sd->files[i]->blocks, hsize, cbc, h);
     }
 
     fclose(h);

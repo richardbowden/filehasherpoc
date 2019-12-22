@@ -3,11 +3,12 @@
 #include <sqlite3.h>
 #include "directories.h"
 
-void db_init();
+void db_init(void);
 int db_add_set(sync_directory *sd, int in_trans);
 int db_add_file(file_t *f, int set_id, int in_trans);
-void db_add_blocks(file_t *f, int file_id, int in_trans);
-void db_close();
+void db_add_block(block_t *block, int in_trans, int *b_id);
+//void db_add_blocks(file_t *f, int file_id, int in_trans, int *b_id);
+void db_close(void);
 
 int db_sd_import(sync_directory *sd);
 int db_hblk_compare(char *primary, char *secondary);
