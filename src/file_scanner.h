@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/stat.h>
+#include "meowhash.h"
 
 enum block_mode_flags{
      BM_BLOCKS       = 0x1,
@@ -23,7 +24,8 @@ typedef struct block_s
 {
     size_t offset;
     int mode;
-    int hash[4];   //the hash, its 128bit split in to 4, see https://github.com/cmuratori/meow_hash
+    meow_u128 raw;
+    char str[33];
 } block_t;
 
 int FileTypeFile;

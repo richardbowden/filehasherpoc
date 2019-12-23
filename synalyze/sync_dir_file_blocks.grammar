@@ -39,21 +39,19 @@
             <structref name="atimespec" id="28" fillcolor="FF682E" structure="id:27"/>
             <structref name="mtimespec" id="29" structure="id:27"/>
             <structref name="ctimespec" id="30" structure="id:27"/>
-            <structref name="whole_file_hash" id="33" structure="id:32"/>
-            <number name="block_count" id="31" type="integer" length="64" lengthunit="bit" signed="yes" endian="little"/>
-            <structref name="blocks" id="34" repeatmax="block_count" structure="id:32"/>
+            <structref name="whole_file_hash" id="32" structure="id:31"/>
+            <number name="block_count" id="33" type="integer" length="64" lengthunit="bit" signed="yes" endian="little"/>
+            <structref name="blocks" id="34" repeatmax="block_count" structure="id:31"/>
         </structure>
         <structure name="timespec" id="27" length="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
             <number name="tv_sec" mustmatch="yes" id="36" type="integer" length="8" endian="little"/>
             <number name="tv_nsec" mustmatch="yes" id="37" type="integer" length="8" endian="little"/>
         </structure>
-        <structure name="block" id="32" length="32" alignment="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
+        <structure name="block" id="31" length="80" alignment="0" encoding="ISO_8859-1:1987" endian="little" signed="no">
             <number name="offset" id="39" fillcolor="FF0000" type="integer" length="8" signed="yes"/>
             <number name="mode" id="40" type="integer" length="4"/>
-            <number name="hash3" id="41" fillcolor="FFB18B" type="integer" length="4" signed="yes"/>
-            <number name="hash2" id="42" fillcolor="FFC970" type="integer" length="4" signed="yes"/>
-            <number name="hash1" id="43" fillcolor="FFED36" type="integer" length="4" signed="yes"/>
-            <number name="hash0" id="44" fillcolor="FFBE00" type="integer" length="4" signed="yes"/>
+            <binary name="raw" id="46" length="20"/>
+            <string name="str" id="43" type="fixed-length" length="32"/>
         </structure>
     </grammar>
 </ufwb>

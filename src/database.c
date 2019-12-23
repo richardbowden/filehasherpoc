@@ -15,7 +15,7 @@ static sqlite3_stmt *add_set_query;
 static char *add_file = "insert into files (set_id, file_abs, file_rel, size, gid, uid, atimespec, mtimespec, ctimespec, block_count, whole_file_hash_id) values(?,?,?,?,?,?,?,?,?,?,?);";
 static sqlite3_stmt *add_file_query;
 
-static char *add_blocks = "insert into blocks (block3, block2, block1, block0) values(?,?,?,?);";
+static char *add_blocks = "insert into blocks (raw, str) values(?,?);";
 static sqlite3_stmt *add_blocks_query;
 
 static char *add_file_blocks = "insert into file_blocks (file_id, block_id, block_pos, mode, offset) values(?,?,?,?,?);";
@@ -96,10 +96,8 @@ void db_create_tables()
 
     char *blocks = "create table if not exists blocks ("
                    "id INTEGER PRIMARY KEY NOT NULL,"
-                   "block3 TEXT NOT NULL,"
-                   "block2 TEXT NOT NULL,"
-                   "block1 TEXT NOT NULL,"
-                   "block0 TEXT NOT NULL"
+                   "raw TEXT,"
+                   "str TEXT NOT NULL"
                    ");";
 
     char *file_blocks = "create table if not exists file_blocks ("
@@ -230,15 +228,8 @@ int db_add_file(file_t *f, int set_id, int in_trans){
 
 void db_add_block(block_t *block, int in_trans, int *b_id){
     sqlite3_reset(add_blocks_query);
-//    char *add_blocks = "insert into blocks (block3, block2, block1, block0) values(?,?,?,?);";
-    
-//    sqlite3_stmt *query;
-//    sqlite3_prepare_v2(db, add_blocks, -1, &query, 0);
-    
-    sqlite3_bind_int(add_blocks_query, 1, block->hash[3]);
-    sqlite3_bind_int(add_blocks_query, 2, block->hash[2]);
-    sqlite3_bind_int(add_blocks_query, 3, block->hash[1]);
-    sqlite3_bind_int(add_blocks_query, 4, block->hash[0]);
+
+    sqlite3_bind_text(add_blocks_query, 2, block->str, -1 ,NULL);
         
     int res = sqlite3_step(add_blocks_query);
         
