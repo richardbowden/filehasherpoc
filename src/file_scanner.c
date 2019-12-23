@@ -154,6 +154,10 @@ void readable_fs(double size /*in bytes*/, char **buf)
 
 void hash_file(file_t* f)
 {
+
+    printf("\r\033[K hashing: %s", f->file_rel);
+    fflush(stdout);
+
     FILE* fp;
     fp = fopen(f->file_abs, "rb");
 
@@ -193,18 +197,18 @@ void hash_file(file_t* f)
 
     meow_u128 whole_file_hash = MeowEnd(ms, NULL);
     
-    printf("file: %s, whole file hash: %08X-%08X-%08X-%08X\n",
-           f->file_rel,
-           MeowU32From(whole_file_hash, 3),
-           MeowU32From(whole_file_hash, 2),
-           MeowU32From(whole_file_hash, 1),
-           MeowU32From(whole_file_hash, 0));
+    // printf("file: %s, whole file hash: %08X-%08X-%08X-%08X\n",
+    //        f->file_rel,
+    //        MeowU32From(whole_file_hash, 3),
+    //        MeowU32From(whole_file_hash, 2),
+    //        MeowU32From(whole_file_hash, 1),
+    //        MeowU32From(whole_file_hash, 0));
     
-    printf("%d, %d, %d, %d, ",
-    MeowU32From(whole_file_hash, 3),
-    MeowU32From(whole_file_hash, 2),
-    MeowU32From(whole_file_hash, 1),
-    MeowU32From(whole_file_hash, 0));
+    // printf("%d, %d, %d, %d, ",
+    // MeowU32From(whole_file_hash, 3),
+    // MeowU32From(whole_file_hash, 2),
+    // MeowU32From(whole_file_hash, 1),
+    // MeowU32From(whole_file_hash, 0));
     
     f->whole_file_hash.hash[3] = MeowU32From(whole_file_hash, 3);
     f->whole_file_hash.hash[2] = MeowU32From(whole_file_hash, 2);
@@ -213,10 +217,10 @@ void hash_file(file_t* f)
     f->whole_file_hash.mode = BM_FILE | BM_HASH_MEOW;
     f->whole_file_hash.offset = 0;
     
-    printf("whole struct: %lu\n", sizeof(f->whole_file_hash));
-    printf("block hash x1: %lu\n", sizeof(f->whole_file_hash.hash[0]));
-    printf("mode: %lu\n", sizeof(f->whole_file_hash.mode));
-    printf("offset: %lu\n", sizeof(f->whole_file_hash.offset));
+    // printf("whole struct: %lu\n", sizeof(f->whole_file_hash));
+    // printf("block hash x1: %lu\n", sizeof(f->whole_file_hash.hash[0]));
+    // printf("mode: %lu\n", sizeof(f->whole_file_hash.mode));
+    // printf("offset: %lu\n", sizeof(f->whole_file_hash.offset));
 
     f->block_count = block_counter;
     fclose(fp);
