@@ -155,9 +155,6 @@ void readable_fs(double size /*in bytes*/, char **buf)
 void hash_file(file_t* f)
 {
 
-    printf("\r\033[K hashing: %s", f->file_rel);
-    fflush(stdout);
-
     FILE* fp;
     fp = fopen(f->file_abs, "rb");
 
@@ -270,7 +267,10 @@ int file_handler(const char* cur_file, const struct stat* f_stat, int i)
 
         scanned_bytes += f_stat->st_size;
         scanned_files++;
-
+        
+        printf("\r\033[K scanned: %zu, bytes: %zu", scanned_files, scanned_bytes);
+        fflush(stdout);
+        
         time_t s, t;
         s = clock();
         hash_file(f);
