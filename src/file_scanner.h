@@ -24,7 +24,8 @@ typedef struct block_s
 {
     size_t offset;
     int mode;
-    meow_u128 raw;
+    long raw_high;
+    long raw_low;
     char str[33];
 } block_t;
 

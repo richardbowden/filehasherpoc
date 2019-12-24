@@ -7,6 +7,7 @@
 #include "directory_hblk.h"
 
 static sqlite3 *db;
+
 void db_create_tables();
 
 static char *add_set = "insert into sets (set_name, base_path, hostname, file_count, started_at, finished_at) values(?,?,?,?,?,?);";
@@ -15,7 +16,7 @@ static sqlite3_stmt *add_set_query;
 static char *add_file = "insert into files (set_id, file_abs, file_rel, size, gid, uid, atimespec, mtimespec, ctimespec, block_count, whole_file_hash_id) values(?,?,?,?,?,?,?,?,?,?,?);";
 static sqlite3_stmt *add_file_query;
 
-static char *add_blocks = "insert into blocks (raw, str) values(?,?);";
+static char *add_blocks = "insert into blocks (raw_high, raw_low, str) values(?,?,?);";
 static sqlite3_stmt *add_blocks_query;
 
 static char *add_file_blocks = "insert into file_blocks (file_id, block_id, block_pos, mode, offset) values(?,?,?,?,?);";
@@ -58,7 +59,7 @@ void db_init()
     }
 
     db_create_tables();
-    
+
     sqlite3_prepare_v2(db, add_set, -1, &add_set_query, 0);
     sqlite3_prepare_v2(db, add_file, -1, &add_file_query, 0);
     sqlite3_prepare_v2(db, add_blocks, -1, &add_blocks_query, 0);
@@ -96,7 +97,8 @@ void db_create_tables()
 
     char *blocks = "create table if not exists blocks ("
                    "id INTEGER PRIMARY KEY NOT NULL,"
-                   "raw TEXT,"
+                   "raw_high INTEGER NOT NULL,"
+                   "raw_low INTEGER NOT NULL,"
                    "str TEXT NOT NULL"
                    ");";
 
@@ -148,7 +150,7 @@ void db_create_tables()
     res = sqlite3_step(query);
     if (res != SQLITE_DONE)
     {
-        printf("error creating blocks table: %s\n", sqlite3_errstr(res));
+        printf("error creating file blocks table: %s\n", sqlite3_errstr(res));
         exit(EXIT_FAILURE);
     }
     sqlite3_finalize(query);
@@ -228,9 +230,13 @@ int db_add_file(file_t *f, int set_id, int in_trans){
 
 void db_add_block(block_t *block, int in_trans, int *b_id){
     sqlite3_reset(add_blocks_query);
+    sqlite3_clear_bindings(add_blocks_query);
 
-    sqlite3_bind_text(add_blocks_query, 2, block->str, -1 ,NULL);
-        
+
+    sqlite3_bind_int64(add_blocks_query, 1, block->raw_high);
+    sqlite3_bind_int64(add_blocks_query, 2, block->raw_low);
+    sqlite3_bind_text(add_blocks_query, 3, block->str, -1 ,NULL);
+
     int res = sqlite3_step(add_blocks_query);
         
     if (res != SQLITE_DONE){
@@ -243,15 +249,12 @@ void db_add_block(block_t *block, int in_trans, int *b_id){
         exit(EXIT_FAILURE);
         
     }
-//    sqlite3_reset(query);
 
-    
     if (!in_trans){
         sqlite3_finalize(add_blocks_query);
     }
     
     *b_id = sqlite3_last_insert_rowid(db);
-//    sqlite3_finalize(query);
 }
 
 void db_close(){

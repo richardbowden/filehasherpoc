@@ -181,55 +181,32 @@ void hash_file(file_t* f)
         meow_u128 Hash = MeowHash(MeowDefaultSeed, cur_bytes_read, buffer);
         f->blocks[block_counter].mode = BM_BLOCKS | BM_HASH_MEOW;
         f->blocks[block_counter].offset = total_read;
-        f->blocks[block_counter].raw = Hash;
-        
-        
-        
-//        char a[33];
-        
-//        int d = sprintf(a, "%08llX%08llX", MeowU64From(Hash, 1), MeowU64From(Hash, 0));
-        sprintf(f->blocks[block_counter].str, "%08llX%08llX", MeowU64From(Hash, 1), MeowU64From(Hash, 0));
-        
-//        strcpy(f->blocks[block_counter].str, a);
-        
-//        DEBUG_PRINT("block: %zu\n", block_counter);
-//        DEBUG_HASH(f->blocks[block_counter].hash);
 
+        sprintf(f->blocks[block_counter].str, "%08llX%08llX", MeowU64From(Hash, 1), MeowU64From(Hash, 0));
+
+        f->blocks[block_counter].raw_high = MeowU64From(Hash, 1);
+        f->blocks[block_counter].raw_low = MeowU64From(Hash, 0);
+        size_t g = sizeof(block_t);
         block_counter += 1;
     }
 
     meow_u128 whole_file_hash = MeowEnd(ms, NULL);
     
-     printf("file: %s, whole file hash: %08X-%08X-%08X-%08X\n",
+    DEBUG_PRINT("file: %s, whole file hash: %08llX-%08llX\n",
             f->file_rel,
-            MeowU32From(whole_file_hash, 3),
-            MeowU32From(whole_file_hash, 2),
-            MeowU32From(whole_file_hash, 1),
-            MeowU32From(whole_file_hash, 0));
-    
-    // printf("%d, %d, %d, %d, ",
-    // MeowU32From(whole_file_hash, 3),
-    // MeowU32From(whole_file_hash, 2),
-    // MeowU32From(whole_file_hash, 1),
-    // MeowU32From(whole_file_hash, 0));
-    
-//    f->whole_file_hash.hash[3] = MeowU32From(whole_file_hash, 3);
-//    f->whole_file_hash.hash[2] = MeowU32From(whole_file_hash, 2);
-//    f->whole_file_hash.hash[1] = MeowU32From(whole_file_hash, 1);
-//    f->whole_file_hash.hash[0] = MeowU32From(whole_file_hash, 0);
-    f->whole_file_hash.raw = whole_file_hash;
+            MeowU64From(whole_file_hash, 1),
+            MeowU64From(whole_file_hash, 0));
+
     sprintf(f->whole_file_hash.str, "%08llX%08llX", MeowU64From(whole_file_hash, 1), MeowU64From(whole_file_hash, 0));
     
     f->whole_file_hash.mode = BM_FILE | BM_HASH_MEOW;
     f->whole_file_hash.offset = 0;
-    
-    // printf("whole struct: %lu\n", sizeof(f->whole_file_hash));
-    // printf("block hash x1: %lu\n", sizeof(f->whole_file_hash.hash[0]));
-    // printf("mode: %lu\n", sizeof(f->whole_file_hash.mode));
-    // printf("offset: %lu\n", sizeof(f->whole_file_hash.offset));
+    f->whole_file_hash.raw_high = MeowU64From(whole_file_hash, 1);
+    f->whole_file_hash.raw_low = MeowU64From(whole_file_hash, 0);
 
     f->block_count = block_counter;
     fclose(fp);
+    free(ms);
 }
 
 file_t* fs_fifo_pop(file_fifo_t* list)
@@ -300,11 +277,6 @@ int file_handler(const char* cur_file, const struct stat* f_stat, int i)
 }
 
 int (*file_handle)(const char* f, const struct stat* f_stat, int i) = file_handler;
-
-// file_fifo_t *scan_files(char *root)
-// {
-//     file_fifo_t *queue
-// }
 
 int fs_get_files(char* root_dir, file_fifo_t* queue)
 {

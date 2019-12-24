@@ -33,3 +33,11 @@ Get block info for a file
 https://dbdiagram.io/d
 
 https://app.sqldbm.com/PostgreSQL/Draft/
+
+
+# load 128bit values
+        #include <emmintrin.h>
+        #include <x86intrin.h>
+
+        __m128i j;
+        j = _mm_set_epi64x(f->blocks[block_counter].raw_high,f->blocks[block_counter].raw_low);

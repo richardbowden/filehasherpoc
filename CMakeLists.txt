@@ -21,10 +21,6 @@ message (STATUS "build type: " ${CMAKE_BUILD_TYPE})
 
 INCLUDE(CheckCCompilerFlag)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -maes -mavx2")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -maes -mavx2")
-
-
 find_package(SQLite3 REQUIRED)
 
 add_executable(filescanner 
@@ -38,7 +34,13 @@ add_executable(filescanner
 	src/directory_hblk.h
 	src/database.h
 	src/database.c
-)
+		)
+
+target_compile_options(filescanner PUBLIC -maes -mavx2)
+
+#add_executable(dd src/dbtest.c src/database.c src/database.h src/meowhash.h)
 
 target_link_libraries(filescanner ${SQLite3_LIBRARIES})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+#target_link_libraries(dd ${SQLite3_LIBRARIES})
