@@ -123,7 +123,8 @@ void db_create_tables()
         printf("error creating sets table: %s\n", sqlite3_errstr(res));
         exit(EXIT_FAILURE);
     }
-    sqlite3_reset(query);
+    sqlite3_finalize(query);
+
     
     //files
     sqlite3_prepare_v2(db, files_table, strlen(files_table), &query, &tail);
@@ -133,9 +134,27 @@ void db_create_tables()
         printf("error creating files table: %s\n", sqlite3_errstr(res));
         exit(EXIT_FAILURE);
     }
-    sqlite3_reset(query);
-    
-    
+    sqlite3_finalize(query);
+
+    char *err;
+    sqlite3_exec(db, "CREATE INDEX if not exists file_abs_idx ON files(file_abs)", NULL, NULL, &err);
+
+    if (err)
+    {
+        printf("error creating index: %s\n", sqlite3_errstr(res));
+        exit(EXIT_FAILURE);
+    }
+
+    sqlite3_exec(db, "create view if not exists set_files as select * from sets inner join (select * from files ff inner join blocks b on b.id = ff.whole_file_hash_id) f on sets.id = f.set_id", NULL, NULL, &err);
+
+    if (err)
+    {
+        printf("error creating view: %s\n", sqlite3_errstr(res));
+        exit(EXIT_FAILURE);
+    }
+
+//    sqlite3_finalize(query);
+
     //blocks
     sqlite3_prepare_v2(db, blocks, strlen(blocks), &query, &tail);
     res = sqlite3_step(query);
@@ -144,7 +163,7 @@ void db_create_tables()
         printf("error creating blocks table: %s\n", sqlite3_errstr(res));
         exit(EXIT_FAILURE);
     }
-    sqlite3_reset(query);
+    sqlite3_finalize(query);
     
     sqlite3_prepare_v2(db, file_blocks, strlen(file_blocks), &query, &tail);
     res = sqlite3_step(query);
