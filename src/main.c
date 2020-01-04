@@ -14,6 +14,8 @@
 #include "database.h"
 #include <time.h>
 
+#include "librb.h"
+
 int errno;
 
 char *hostname;
@@ -32,6 +34,9 @@ void get_hostname(){
 
 int main(int argc, char *argv[])
 {
+
+    char *jjj = expand_home_dir("~/bin");
+    printf("%s\n", jjj);
     
     get_hostname();
     db_init();
